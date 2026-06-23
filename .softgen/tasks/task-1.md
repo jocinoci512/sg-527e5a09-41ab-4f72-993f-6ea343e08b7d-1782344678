@@ -1,6 +1,6 @@
 ---
 title: Global Architecture and Branding
-status: in_progress
+status: done
 priority: urgent
 type: feature
 tags: [layout, design-system, shell]
