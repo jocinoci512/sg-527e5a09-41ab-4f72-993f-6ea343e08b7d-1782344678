@@ -6,12 +6,17 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
-    // Fetch all published blog posts
-    const { data: posts } = await supabase
+    // Fetch all published blog posts - handle potential errors gracefully
+    const { data: posts, error } = await supabase
       .from("blog_posts")
-      .select("slug, updated_at, published_at")
+      .select("slug, updated_at, created_at")
       .eq("status", "published")
-      .order("published_at", { ascending: false });
+      .order("created_at", { ascending: false });
+
+    // Log any query errors but continue with sitemap generation
+    if (error) {
+      console.error("Error fetching blog posts for sitemap:", error);
+    }
 
     // Static pages
     const staticPages = [
@@ -55,7 +60,7 @@ export default async function handler(
             (post) => `
   <url>
     <loc>${baseUrl}/blog/${post.slug}</loc>
-    <lastmod>${new Date(post.updated_at || post.published_at).toISOString()}</lastmod>
+    <lastmod>${new Date(post.updated_at || post.created_at).toISOString()}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>`
