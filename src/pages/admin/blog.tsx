@@ -8,19 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  LayoutDashboard, 
-  FileText, 
-  Users, 
-  MessageSquare,
-  Settings,
-  LogOut,
-  Plus,
-  Edit,
-  Trash2,
-  Eye
-} from "lucide-react";
+import { Plus, Edit, Trash2, Eye, Bell } from "lucide-react";
 
 export default function AdminBlog() {
   const [showEditor, setShowEditor] = useState(false);
@@ -61,52 +49,38 @@ export default function AdminBlog() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      {/* Header */}
-      <header className="sticky top-0 z-40 border-b bg-background">
-        <div className="flex h-16 items-center justify-between px-6">
-          <div className="flex items-center gap-6">
-            <Image
-              src="/logo.png"
-              alt="Cipher Trace"
-              width={150}
-              height={45}
-            />
-            <nav className="flex gap-4">
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/admin">
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  Dashboard
-                </Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/admin/cases">
-                  <FileText className="mr-2 h-4 w-4" />
-                  Cases
-                </Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/admin/leads">
-                  <Users className="mr-2 h-4 w-4" />
-                  Leads
-                </Link>
-              </Button>
-              <Button variant="default" size="sm" asChild>
-                <Link href="/admin/content">
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  Content
-                </Link>
-              </Button>
-            </nav>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm">
-              <Settings className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/admin/login">
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-              </Link>
+      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="flex h-16 items-center gap-4 px-6">
+          <Link href="/admin" className="flex items-center gap-2">
+            <Image src="/logo.png" alt="Cipher Trace" width={40} height={40} />
+            <span className="font-heading font-bold text-lg">Cipher Trace Admin</span>
+          </Link>
+          <nav className="flex items-center gap-6 ml-8">
+            <Link href="/admin" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              Dashboard
+            </Link>
+            <Link href="/admin/cases" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              Cases
+            </Link>
+            <Link href="/admin/leads" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              Leads
+            </Link>
+            <Link href="/admin/blog" className="text-sm font-medium text-foreground hover:text-foreground transition-colors">
+              Blog
+            </Link>
+            <Link href="/admin/content" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              Content
+            </Link>
+            <Link href="/admin/reports" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              Reports
+            </Link>
+            <Link href="/admin/notifications" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <Bell className="h-4 w-4" />
+            </Link>
+          </nav>
+          <div className="ml-auto">
+            <Button asChild variant="outline" size="sm">
+              <Link href="/">View Site</Link>
             </Button>
           </div>
         </div>

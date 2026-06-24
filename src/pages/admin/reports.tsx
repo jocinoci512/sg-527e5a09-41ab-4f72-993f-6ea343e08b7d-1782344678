@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Download, Trash2, Calendar, Filter, Plus, TrendingUp, BarChart3 } from "lucide-react";
+import { FileText, Download, Trash2, Calendar, Filter, Plus, TrendingUp, BarChart3, Bell } from "lucide-react";
 import { format } from "date-fns";
 
 export default function AdminReports() {
@@ -93,6 +93,9 @@ export default function AdminReports() {
             </Link>
             <Link href="/admin/reports" className="text-sm font-medium text-foreground hover:text-foreground transition-colors">
               Reports
+            </Link>
+            <Link href="/admin/notifications" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <Bell className="h-4 w-4" />
             </Link>
           </nav>
           <div className="ml-auto">
