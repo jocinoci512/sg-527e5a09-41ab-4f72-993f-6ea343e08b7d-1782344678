@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Phone, MessageCircle, Clock, MapPin, Send } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -265,9 +266,9 @@ export default function Contact() {
               <div className="mt-6 text-center">
                 <p className="text-sm text-muted-foreground">
                   For comprehensive case review and investigation services, please use our{" "}
-                  <a href="/case-review" className="text-primary hover:underline font-medium">
+                  <Link href="/case-review" className="text-primary hover:underline font-medium">
                     Case Review Form
-                  </a>
+                  </Link>
                 </p>
               </div>
             </div>

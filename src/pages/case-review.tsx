@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
 import { Shield, FileText, Clock, Lock, CheckCircle } from "lucide-react";
+import Link from "next/link";
 
 export default function CaseReview() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -72,7 +73,7 @@ export default function CaseReview() {
             </div>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg">
-                <a href="/">Return to Homepage</a>
+                <Link href="/">Return to Homepage</Link>
               </Button>
               <Button asChild size="lg" variant="outline">
                 <a href="https://wa.me/16462440064" target="_blank" rel="noopener noreferrer">
