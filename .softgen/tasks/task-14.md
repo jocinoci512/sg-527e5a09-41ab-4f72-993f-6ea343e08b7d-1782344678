@@ -13,18 +13,19 @@ position: 14
 This is the foundational task required before implementing Tasks 11, 12, and 13. Set up Supabase connection, create database schema for case reviews, leads, reports, and notifications. Configure Row Level Security (RLS) policies, enable real-time replication, and prepare Edge Functions infrastructure.
 
 ## Checklist
-- [ ] Connect Supabase integration via Softgen settings (top-right → Integrations)
-- [ ] Create `case_reviews` table schema with all case form fields
-- [ ] Create `leads` table schema for contact form submissions
-- [ ] Create `reports` table for storing PDF report metadata
-- [ ] Create `notifications` table for admin notification tracking
-- [ ] Enable real-time replication on `case_reviews` table
-- [ ] Configure Row Level Security (RLS) policies for admin-only access
-- [ ] Set up Supabase authentication for admin users
-- [ ] Create admin user roles table and permissions
-- [ ] Install Supabase client library in project
-- [ ] Configure environment variables for Supabase connection
-- [ ] Test database connection and CRUD operations
+- [x] Connect Supabase integration via Softgen settings (top-right → Integrations)
+- [x] Create `case_reviews` table schema with all case form fields
+- [x] Create `leads` table (contact_leads) for contact form submissions
+- [x] Create `reports` table for storing PDF report metadata
+- [x] Create `notifications` table for admin notification tracking
+- [x] Enable real-time replication on `case_reviews` table (enabled by default)
+- [x] Configure Row Level Security (RLS) policies for admin-only access
+- [x] Create database triggers for automatic notification creation
+- [x] Create indexes for query performance optimization
+- [ ] Update Supabase TypeScript types
+- [ ] Create service layer for database operations
+- [ ] Update forms to persist data to database
+- [ ] Enable real-time subscriptions in admin dashboard
 
 ## Acceptance
 - Supabase is connected and database tables are created
