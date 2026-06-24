@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Link from "next/link";
-import { Shield, Search, FileText, Globe, Lock, CheckCircle, ArrowRight, AlertTriangle, Heart, TrendingUp, Coins, DollarSign, Users, Star, Quote, BarChart3, Target, Award, Clock } from "lucide-react";
+import { Shield, Search, FileText, Globe, Lock, CheckCircle, ArrowRight, AlertTriangle, Heart, TrendingUp, Coins, DollarSign, Users, Star, Quote, BarChart3, Target, Award, Clock, PlayCircle } from "lucide-react";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
+import { VideoEmbed } from "@/components/VideoEmbed";
 import { useState, useEffect } from "react";
 import { homepageService } from "@/services/homepageService";
 
@@ -440,6 +441,37 @@ export default function Home() {
     }
   ];
 
+  const investigationVideos = [
+    {
+      vimeoId: "996807223",
+      title: "Cryptocurrency Fraud Investigation Process",
+      description: "Learn how our blockchain forensics team traces stolen cryptocurrency and identifies perpetrators."
+    },
+    {
+      vimeoId: "996807160",
+      title: "Case Study: Investment Scam Recovery",
+      description: "Real-world example of how we helped a victim recover evidence and work with law enforcement."
+    },
+    {
+      vimeoId: "996807100",
+      title: "Understanding Blockchain Tracing",
+      description: "See our advanced tools and techniques for tracking digital assets across multiple blockchains."
+    }
+  ];
+
+  const clientTestimonialVideos = [
+    {
+      vimeoId: "996806916",
+      title: "Client Success Story",
+      description: "Hear from a satisfied client about their experience working with Cipher Trace investigators."
+    },
+    {
+      vimeoId: "996805094",
+      title: "Professional Investigation Expertise",
+      description: "Our team discusses the comprehensive approach to fraud investigation and victim support."
+    }
+  ];
+
   return (
     <Layout>
       <SEO 
@@ -551,6 +583,68 @@ export default function Home() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* NEW: Professional Video Gallery Section */}
+      <section className="py-16 lg:py-24 bg-muted/30 border-y border-border">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium mb-4">
+              <PlayCircle className="h-4 w-4" />
+              <span className="text-sm">Video Gallery</span>
+            </div>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl font-heading">
+              See Our Investigators in Action
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Watch real case studies, learn about our investigation methodology, and hear from clients we've helped
+            </p>
+          </div>
+          
+          {/* Featured Investigation Videos */}
+          <div className="mb-16">
+            <h3 className="text-2xl font-bold text-center mb-8 font-heading">Investigation & Case Studies</h3>
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+              {investigationVideos.map((video, index) => (
+                <div key={index}>
+                  <VideoEmbed
+                    vimeoId={video.vimeoId}
+                    title={video.title}
+                    description={video.description}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Client Testimonial Videos */}
+          <div>
+            <h3 className="text-2xl font-bold text-center mb-8 font-heading">Client Testimonials</h3>
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 max-w-5xl mx-auto">
+              {clientTestimonialVideos.map((video, index) => (
+                <div key={index}>
+                  <VideoEmbed
+                    vimeoId={video.vimeoId}
+                    title={video.title}
+                    description={video.description}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-12 text-center">
+            <p className="text-sm text-muted-foreground mb-6">
+              All videos showcase real investigation methodologies and verified client experiences
+            </p>
+            <Button asChild size="lg" variant="default">
+              <Link href="/case-review">
+                Start Your Case Review
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
