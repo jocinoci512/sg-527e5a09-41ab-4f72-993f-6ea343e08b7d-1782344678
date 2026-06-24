@@ -1,0 +1,345 @@
+import { Layout } from "@/components/Layout";
+import { SEO } from "@/components/SEO";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { Shield, FileText, Clock, Lock, CheckCircle } from "lucide-react";
+
+export default function CaseReview() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    const formData = new FormData(e.currentTarget);
+    
+    // TODO: Once Supabase is connected, integrate with backend API
+    // For now, simulate submission
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setIsSubmitted(true);
+      console.log("Form data:", Object.fromEntries(formData));
+    }, 1500);
+  };
+
+  if (isSubmitted) {
+    return (
+      <Layout>
+        <SEO 
+          title="Case Review Submitted | Cipher Trace"
+          description="Your case review has been submitted successfully. Our team will contact you shortly."
+        />
+        
+        <section className="py-16 lg:py-24">
+          <div className="mx-auto max-w-2xl px-6 lg:px-8 text-center">
+            <div className="mb-8">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
+                <CheckCircle className="h-10 w-10 text-green-600" />
+              </div>
+            </div>
+            <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl font-heading mb-6">
+              Case Review Submitted
+            </h1>
+            <p className="text-lg text-muted-foreground mb-8">
+              Thank you for submitting your case information. Our investigation team will review your submission and contact you within 24-48 hours to discuss next steps.
+            </p>
+            <div className="space-y-4 text-left bg-muted/30 p-6 rounded-lg mb-8">
+              <h2 className="text-xl font-semibold text-foreground font-heading">What happens next?</h2>
+              <ul className="space-y-3 text-muted-foreground">
+                <li className="flex items-start gap-3">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold flex-shrink-0">1</div>
+                  <span>Our team reviews your case details and supporting documentation</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold flex-shrink-0">2</div>
+                  <span>We conduct preliminary research and assess investigation options</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold flex-shrink-0">3</div>
+                  <span>A senior investigator will contact you to discuss findings and recommendations</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold flex-shrink-0">4</div>
+                  <span>We outline available investigation services and provide transparent pricing</span>
+                </li>
+              </ul>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button asChild size="lg">
+                <a href="/">Return to Homepage</a>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <a href="https://wa.me/16462440064" target="_blank" rel="noopener noreferrer">
+                  Chat on WhatsApp
+                </a>
+              </Button>
+            </div>
+          </div>
+        </section>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout>
+      <SEO 
+        title="Free Case Review | Cipher Trace - Cryptocurrency Fraud Investigation"
+        description="Submit your fraud case for professional review. Our blockchain investigation team will analyze your situation and provide expert guidance on recovery options."
+      />
+
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-primary/90 py-20 lg:py-32">
+        <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:32px_32px]" />
+        <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-3xl text-center">
+            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl font-heading">
+              Start Your Free Case Review
+            </h1>
+            <p className="mt-6 text-lg leading-8 text-white/90 sm:text-xl">
+              Provide details about your situation and our investigation team will review your case within 24-48 hours. All information is handled with strict confidentiality.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 lg:py-24">
+        <div className="mx-auto max-w-5xl px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            <Card className="border-2">
+              <CardHeader>
+                <Shield className="h-10 w-10 text-primary mb-2" />
+                <CardTitle className="font-heading">Confidential</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  All case information is protected under strict confidentiality agreements and handled with professional discretion.
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2">
+              <CardHeader>
+                <Clock className="h-10 w-10 text-primary mb-2" />
+                <CardTitle className="font-heading">Fast Response</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  Our team reviews all submissions within 24-48 hours and prioritizes urgent cases requiring immediate attention.
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2">
+              <CardHeader>
+                <FileText className="h-10 w-10 text-primary mb-2" />
+                <CardTitle className="font-heading">No Obligation</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  Case review is completely free with no obligation. We provide honest assessment of investigation options.
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="border-2">
+            <CardHeader>
+              <CardTitle className="text-2xl font-heading">Case Information Form</CardTitle>
+              <CardDescription>
+                Please provide as much detail as possible to help us understand your situation.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">Full Name *</Label>
+                    <Input 
+                      id="fullName" 
+                      name="fullName" 
+                      required 
+                      placeholder="John Doe"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email Address *</Label>
+                    <Input 
+                      id="email" 
+                      name="email" 
+                      type="email" 
+                      required 
+                      placeholder="john@example.com"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number *</Label>
+                    <Input 
+                      id="phone" 
+                      name="phone" 
+                      type="tel" 
+                      required 
+                      placeholder="+1 (555) 000-0000"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="country">Country *</Label>
+                    <Input 
+                      id="country" 
+                      name="country" 
+                      required 
+                      placeholder="United States"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="scamType">Type of Fraud *</Label>
+                  <Select name="scamType" required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select fraud type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cryptocurrency">Cryptocurrency Scam</SelectItem>
+                      <SelectItem value="investment">Investment Scam</SelectItem>
+                      <SelectItem value="romance">Romance Scam</SelectItem>
+                      <SelectItem value="forex">Forex Scam</SelectItem>
+                      <SelectItem value="pig-butchering">Pig Butchering Scam</SelectItem>
+                      <SelectItem value="nft">NFT Scam</SelectItem>
+                      <SelectItem value="exchange">Exchange Fraud</SelectItem>
+                      <SelectItem value="wire">Wire Fraud</SelectItem>
+                      <SelectItem value="banking">Banking Fraud</SelectItem>
+                      <SelectItem value="social-media">Social Media Scam</SelectItem>
+                      <SelectItem value="marketplace">Marketplace Fraud</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="amountLost">Estimated Amount Lost *</Label>
+                    <Input 
+                      id="amountLost" 
+                      name="amountLost" 
+                      required 
+                      placeholder="$50,000"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="cryptocurrency">Cryptocurrency Used (if applicable)</Label>
+                    <Input 
+                      id="cryptocurrency" 
+                      name="cryptocurrency" 
+                      placeholder="Bitcoin, Ethereum, USDT, etc."
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="walletAddress">Wallet Address(es) (if known)</Label>
+                  <Input 
+                    id="walletAddress" 
+                    name="walletAddress" 
+                    placeholder="Enter wallet addresses separated by commas"
+                    className="font-mono text-sm"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="scammerWebsite">Scammer Website or Platform URL</Label>
+                  <Input 
+                    id="scammerWebsite" 
+                    name="scammerWebsite" 
+                    type="url" 
+                    placeholder="https://example-scam-site.com"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="incidentDescription">Detailed Description of Incident *</Label>
+                  <Textarea 
+                    id="incidentDescription" 
+                    name="incidentDescription" 
+                    required 
+                    rows={8}
+                    placeholder="Please provide a detailed description of what happened, including dates, how you were contacted, amounts transferred, and any other relevant information that will help us understand your case."
+                    className="resize-none"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="documents">Supporting Documents</Label>
+                  <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
+                    <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <Input 
+                      id="documents" 
+                      name="documents" 
+                      type="file" 
+                      multiple 
+                      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                      className="max-w-xs mx-auto"
+                    />
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Upload screenshots, transaction records, emails, or other evidence (PDF, JPG, PNG, DOC)
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-muted/30 p-4 rounded-lg border-2 border-border">
+                  <div className="flex items-start gap-3">
+                    <Lock className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-muted-foreground">
+                      <p className="font-semibold text-foreground mb-1">Privacy & Confidentiality</p>
+                      <p>
+                        All information submitted is protected under strict confidentiality agreements. Your case details will only be shared with authorized investigation personnel. By submitting this form, you consent to Cipher Trace reviewing your case and contacting you regarding investigation services.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button 
+                    type="submit" 
+                    size="lg" 
+                    disabled={isSubmitting}
+                    className="flex-1 text-lg py-6 font-semibold"
+                  >
+                    {isSubmitting ? "Submitting..." : "Submit Case Review"}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    size="lg" 
+                    variant="outline"
+                    asChild
+                    className="text-lg py-6 font-semibold"
+                  >
+                    <a href="https://wa.me/16462440064" target="_blank" rel="noopener noreferrer">
+                      Contact via WhatsApp
+                    </a>
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+
+          <div className="mt-12 text-center">
+            <p className="text-sm text-muted-foreground italic max-w-3xl mx-auto">
+              Cipher Trace provides fraud investigation, blockchain tracing, intelligence gathering, scam analysis, and recovery consultation services. Recovery outcomes cannot be guaranteed and vary depending on available evidence, jurisdiction, blockchain activity, third-party cooperation, and individual case circumstances.
+            </p>
+          </div>
+        </div>
+      </section>
+    </Layout>
+  );
+}
