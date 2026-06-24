@@ -8,23 +8,47 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Phone, MessageCircle, Clock, MapPin, Send } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
+import { leadService } from "@/services/leadService";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const formData = new FormData(e.currentTarget);
-    
-    // TODO: Once Supabase is connected, integrate with backend API
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const formData = new FormData(e.currentTarget);
+      
+      const leadData = {
+        full_name: formData.get("name") as string,
+        email: formData.get("email") as string,
+        phone: formData.get("phone") as string || null,
+        subject: formData.get("subject") as string,
+        message: formData.get("message") as string,
+        status: "new" as const,
+      };
+
+      await leadService.submitContactLead(leadData);
+      
       setIsSubmitted(true);
-      console.log("Contact form data:", Object.fromEntries(formData));
-    }, 1500);
+      toast({
+        title: "Message Sent",
+        description: "We'll respond to your inquiry within 24 hours.",
+      });
+    } catch (error) {
+      console.error("Error submitting contact form:", error);
+      toast({
+        title: "Submission Failed",
+        description: "There was an error sending your message. Please try emailing us directly.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
