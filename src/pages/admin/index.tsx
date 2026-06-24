@@ -13,7 +13,8 @@ import {
   CheckCircle,
   Clock,
   TrendingUp,
-  FolderOpen
+  FolderOpen,
+  Home
 } from "lucide-react";
 import { LiveCounter } from "@/components/admin/LiveCounter";
 import { NotificationPopup } from "@/components/admin/NotificationPopup";
@@ -119,11 +120,15 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-muted/30">
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-16 items-center gap-4 px-6">
-          <Link href="/admin" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <Image src="/logo.png" alt="Cipher Trace" width={40} height={40} />
             <span className="font-heading font-bold text-lg">Cipher Trace Admin</span>
           </Link>
           <nav className="flex items-center gap-6 ml-8">
+            <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+              <Home className="h-4 w-4" />
+              Home
+            </Link>
             <Link href="/admin" className="text-sm font-medium text-foreground hover:text-foreground transition-colors">
               Dashboard
             </Link>

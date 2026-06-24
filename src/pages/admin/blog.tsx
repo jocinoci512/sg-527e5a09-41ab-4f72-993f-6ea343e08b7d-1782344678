@@ -2,14 +2,14 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Bell, Plus, Edit, Trash2, Eye, Save, X } from "lucide-react";
+import { Bell, Plus, Edit, Trash2, Eye, Save, X, Home } from "lucide-react";
 import { blogService } from "@/services/blogService";
 import { useToast } from "@/hooks/use-toast";
 
@@ -142,11 +142,15 @@ export default function AdminBlog() {
     <div className="min-h-screen bg-muted/30">
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-16 items-center gap-4 px-6">
-          <Link href="/admin" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <Image src="/logo.png" alt="Cipher Trace" width={40} height={40} />
             <span className="font-heading font-bold text-lg">Cipher Trace Admin</span>
           </Link>
           <nav className="flex items-center gap-6 ml-8">
+            <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+              <Home className="h-4 w-4" />
+              Home
+            </Link>
             <Link href="/admin" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               Dashboard
             </Link>
