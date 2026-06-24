@@ -9,24 +9,52 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useState } from "react";
 import { Shield, FileText, Clock, Lock, CheckCircle } from "lucide-react";
 import Link from "next/link";
+import { caseService } from "@/services/caseService";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CaseReview() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const formData = new FormData(e.currentTarget);
-    
-    // TODO: Once Supabase is connected, integrate with backend API
-    // For now, simulate submission
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const formData = new FormData(e.currentTarget);
+      
+      const caseData = {
+        full_name: formData.get("fullName") as string,
+        email: formData.get("email") as string,
+        phone: formData.get("phone") as string,
+        country: formData.get("country") as string,
+        scam_type: formData.get("scamType") as string,
+        amount_lost: formData.get("amountLost") as string,
+        cryptocurrency_used: formData.get("cryptocurrency") as string || null,
+        wallet_address: formData.get("walletAddress") as string || null,
+        scammer_website: formData.get("scammerWebsite") as string || null,
+        incident_description: formData.get("incidentDescription") as string,
+        status: "pending" as const,
+      };
+
+      await caseService.submitCaseReview(caseData);
+      
       setIsSubmitted(true);
-      console.log("Form data:", Object.fromEntries(formData));
-    }, 1500);
+      toast({
+        title: "Case Review Submitted",
+        description: "Our team will contact you within 24-48 hours.",
+      });
+    } catch (error) {
+      console.error("Error submitting case review:", error);
+      toast({
+        title: "Submission Failed",
+        description: "There was an error submitting your case. Please try again or contact us directly.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSubmitted) {
