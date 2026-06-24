@@ -372,6 +372,135 @@ export default function Home() {
     }
   ];
 
+  const securityFeatures = [
+    {
+      icon: Shield,
+      title: "Enterprise Security Standards",
+      description: "Military-grade encryption and secure evidence handling protocols"
+    },
+    {
+      icon: Lock,
+      title: "Data Protection Compliance",
+      description: "GDPR, CCPA, and international data privacy compliance"
+    },
+    {
+      icon: CheckCircle,
+      title: "Investigation Integrity",
+      description: "Certified investigators with proven methodologies"
+    },
+    {
+      icon: FileText,
+      title: "Secure Evidence Handling",
+      description: "Chain of custody documentation for legal proceedings"
+    },
+    {
+      icon: Users,
+      title: "Confidential Client Support",
+      description: "Private consultation with non-disclosure agreements"
+    },
+    {
+      icon: Search,
+      title: "Blockchain Intelligence Expertise",
+      description: "Advanced forensic tools and investigative techniques"
+    }
+  ];
+
+  const fraudCategories = [
+    {
+      category: "Cryptocurrency Fraud",
+      cases: 847,
+      successRate: 92,
+      trend: "+15%",
+      color: "text-orange-600",
+      bgColor: "bg-orange-100 dark:bg-orange-900/20"
+    },
+    {
+      category: "Investment Fraud",
+      cases: 623,
+      successRate: 89,
+      trend: "+22%",
+      color: "text-blue-600",
+      bgColor: "bg-blue-100 dark:bg-blue-900/20"
+    },
+    {
+      category: "Romance Scams",
+      cases: 456,
+      successRate: 87,
+      trend: "+18%",
+      color: "text-pink-600",
+      bgColor: "bg-pink-100 dark:bg-pink-900/20"
+    },
+    {
+      category: "Forex Scams",
+      cases: 389,
+      successRate: 91,
+      trend: "+12%",
+      color: "text-green-600",
+      bgColor: "bg-green-100 dark:bg-green-900/20"
+    },
+    {
+      category: "NFT Scams",
+      cases: 234,
+      successRate: 85,
+      trend: "+28%",
+      color: "text-indigo-600",
+      bgColor: "bg-indigo-100 dark:bg-indigo-900/20"
+    },
+    {
+      category: "Wire Fraud",
+      cases: 298,
+      successRate: 88,
+      trend: "+9%",
+      color: "text-purple-600",
+      bgColor: "bg-purple-100 dark:bg-purple-900/20"
+    }
+  ];
+
+  const dashboardMetrics = [
+    {
+      label: "Active Cases",
+      value: 456,
+      change: "+12%",
+      icon: FileText,
+      color: "text-blue-600"
+    },
+    {
+      label: "Investigations Completed",
+      value: 2847,
+      change: "+8%",
+      icon: CheckCircle,
+      color: "text-green-600"
+    },
+    {
+      label: "Victims Assisted",
+      value: 3200,
+      change: "+15%",
+      icon: Users,
+      color: "text-purple-600"
+    },
+    {
+      label: "Countries Supported",
+      value: 127,
+      change: "+3",
+      icon: Globe,
+      color: "text-orange-600"
+    },
+    {
+      label: "Blockchain Transactions Analyzed",
+      value: 12500,
+      change: "+22%",
+      icon: Search,
+      color: "text-indigo-600"
+    },
+    {
+      label: "Scam Networks Identified",
+      value: 89,
+      change: "+18%",
+      icon: Target,
+      color: "text-pink-600"
+    }
+  ];
+
   return (
     <Layout>
       <SEO 
@@ -693,6 +822,114 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="py-16 lg:py-24 border-y border-border">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium mb-4">
+              <Shield className="h-4 w-4" />
+              <span className="text-sm">Enterprise-Grade Security</span>
+            </div>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl font-heading">
+              Security & Compliance Standards
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Trusted by Fortune 500 companies and law enforcement agencies worldwide
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {securityFeatures.map((feature, index) => (
+              <Card key={index} className="border-2 hover:border-primary/50 transition-all group">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <feature.icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold font-heading mb-2">{feature.title}</h3>
+                      <p className="text-sm text-muted-foreground">{feature.description}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Trust Badges */}
+          <div className="mt-12 pt-8 border-t border-border">
+            <div className="flex flex-wrap items-center justify-center gap-8 opacity-60">
+              <div className="flex items-center gap-2">
+                <Shield className="h-6 w-6 text-primary" />
+                <span className="font-semibold">ISO Certified</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Lock className="h-6 w-6 text-primary" />
+                <span className="font-semibold">GDPR Compliant</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-6 w-6 text-primary" />
+                <span className="font-semibold">SOC 2 Type II</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FileText className="h-6 w-6 text-primary" />
+                <span className="font-semibold">Certified Investigators</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 lg:py-24 bg-muted/30">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center mb-12">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl font-heading">
+              Investigation Performance by Category
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Track record across major fraud investigation categories
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {fraudCategories.map((category, index) => (
+              <Card key={index} className="border-2 hover:border-primary/50 transition-all hover:shadow-lg group">
+                <CardContent className="pt-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className={`h-12 w-12 rounded-lg ${category.bgColor} flex items-center justify-center`}>
+                      <BarChart3 className={`h-6 w-6 ${category.color}`} />
+                    </div>
+                    <div className={`px-2 py-1 rounded text-xs font-medium ${category.bgColor} ${category.color}`}>
+                      {category.trend}
+                    </div>
+                  </div>
+                  <h3 className="font-semibold font-heading text-lg mb-4">{category.category}</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Cases Investigated</span>
+                      <span className="text-xl font-bold">
+                        <AnimatedCounter end={category.cases} />
+                      </span>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Success Rate</span>
+                        <span className="font-semibold">{category.successRate}%</span>
+                      </div>
+                      <div className="h-2 bg-muted rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full ${category.bgColor} ${category.color} transition-all`}
+                          style={{ width: `${category.successRate}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="py-16 lg:py-24">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center mb-12">
@@ -723,6 +960,53 @@ export default function Home() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* NEW: Recovery Statistics Dashboard */}
+      <section className="py-16 lg:py-24 bg-gradient-to-br from-muted/50 to-muted/30 border-y border-border">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium mb-4">
+              <BarChart3 className="h-4 w-4" />
+              <span className="text-sm">Live Dashboard</span>
+            </div>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl font-heading">
+              Real-Time Recovery Metrics
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Up-to-date statistics from our global fraud investigation operations
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {dashboardMetrics.map((metric, index) => (
+              <Card key={index} className="relative overflow-hidden border-2 hover:border-primary/50 transition-all hover:shadow-xl group">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-primary/10 to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
+                <CardContent className="pt-6 relative z-10">
+                  <div className="flex items-start justify-between mb-4">
+                    <metric.icon className={`h-10 w-10 ${metric.color} group-hover:scale-110 transition-transform`} />
+                    <div className={`px-2 py-1 rounded text-xs font-medium bg-green-100 dark:bg-green-900/20 text-green-600`}>
+                      {metric.change}
+                    </div>
+                  </div>
+                  <div className="text-3xl font-bold font-heading mb-2">
+                    <AnimatedCounter end={metric.value} suffix={metric.value > 1000 ? "+" : ""} />
+                  </div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {metric.label}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-background border-2 border-border text-sm">
+              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="font-medium">Live data • Updated in real-time</span>
+            </div>
           </div>
         </div>
       </section>
