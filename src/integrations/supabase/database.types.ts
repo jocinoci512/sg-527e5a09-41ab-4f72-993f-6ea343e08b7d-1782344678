@@ -15,6 +15,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_activity_log: {
+        Row: {
+          action_description: string | null
+          action_type: string
+          admin_email: string
+          created_at: string | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          user_agent: string | null
+        }
+        Insert: {
+          action_description?: string | null
+          action_type: string
+          admin_email: string
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          user_agent?: string | null
+        }
+        Update: {
+          action_description?: string | null
+          action_type?: string
+          admin_email?: string
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       blog_authors: {
         Row: {
           avatar_url: string | null
@@ -111,12 +150,15 @@ export type Database = {
           keywords: string[] | null
           publish_date: string | null
           reading_time: number | null
+          review_status: string | null
+          scheduled_publish_at: string | null
           seo_description: string | null
           seo_title: string | null
           slug: string
           status: string | null
           title: string
           updated_at: string | null
+          validation_errors: Json | null
           views: number | null
         }
         Insert: {
@@ -130,12 +172,15 @@ export type Database = {
           keywords?: string[] | null
           publish_date?: string | null
           reading_time?: number | null
+          review_status?: string | null
+          scheduled_publish_at?: string | null
           seo_description?: string | null
           seo_title?: string | null
           slug: string
           status?: string | null
           title: string
           updated_at?: string | null
+          validation_errors?: Json | null
           views?: number | null
         }
         Update: {
@@ -149,12 +194,15 @@ export type Database = {
           keywords?: string[] | null
           publish_date?: string | null
           reading_time?: number | null
+          review_status?: string | null
+          scheduled_publish_at?: string | null
           seo_description?: string | null
           seo_title?: string | null
           slug?: string
           status?: string | null
           title?: string
           updated_at?: string | null
+          validation_errors?: Json | null
           views?: number | null
         }
         Relationships: [
@@ -295,6 +343,59 @@ export type Database = {
             columns: ["assigned_to"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competitor_rankings: {
+        Row: {
+          competitor_domain: string
+          competitor_page_title: string | null
+          competitor_position: number
+          competitor_url: string | null
+          content_score: number | null
+          created_at: string | null
+          estimated_domain_authority: number | null
+          estimated_traffic_value: number | null
+          id: string
+          keyword_id: string | null
+          ranking_date: string
+          updated_at: string | null
+        }
+        Insert: {
+          competitor_domain: string
+          competitor_page_title?: string | null
+          competitor_position: number
+          competitor_url?: string | null
+          content_score?: number | null
+          created_at?: string | null
+          estimated_domain_authority?: number | null
+          estimated_traffic_value?: number | null
+          id?: string
+          keyword_id?: string | null
+          ranking_date?: string
+          updated_at?: string | null
+        }
+        Update: {
+          competitor_domain?: string
+          competitor_page_title?: string | null
+          competitor_position?: number
+          competitor_url?: string | null
+          content_score?: number | null
+          created_at?: string | null
+          estimated_domain_authority?: number | null
+          estimated_traffic_value?: number | null
+          id?: string
+          keyword_id?: string | null
+          ranking_date?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competitor_rankings_keyword_id_fkey"
+            columns: ["keyword_id"]
+            isOneToOne: false
+            referencedRelation: "seo_keywords"
             referencedColumns: ["id"]
           },
         ]
@@ -670,6 +771,74 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      keyword_rankings: {
+        Row: {
+          click_through_rate: number | null
+          created_at: string | null
+          difficulty_level: string | null
+          id: string
+          keyword_difficulty: number | null
+          keyword_id: string | null
+          meta_description: string | null
+          organic_click_estimate: number | null
+          page_title: string | null
+          position_change: number | null
+          previous_position: number | null
+          ranking_date: string
+          ranking_position: number | null
+          ranking_url: string | null
+          search_volume: number | null
+          seo_opportunity_score: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          click_through_rate?: number | null
+          created_at?: string | null
+          difficulty_level?: string | null
+          id?: string
+          keyword_difficulty?: number | null
+          keyword_id?: string | null
+          meta_description?: string | null
+          organic_click_estimate?: number | null
+          page_title?: string | null
+          position_change?: number | null
+          previous_position?: number | null
+          ranking_date?: string
+          ranking_position?: number | null
+          ranking_url?: string | null
+          search_volume?: number | null
+          seo_opportunity_score?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          click_through_rate?: number | null
+          created_at?: string | null
+          difficulty_level?: string | null
+          id?: string
+          keyword_difficulty?: number | null
+          keyword_id?: string | null
+          meta_description?: string | null
+          organic_click_estimate?: number | null
+          page_title?: string | null
+          position_change?: number | null
+          previous_position?: number | null
+          ranking_date?: string
+          ranking_position?: number | null
+          ranking_url?: string | null
+          search_volume?: number | null
+          seo_opportunity_score?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "keyword_rankings_keyword_id_fkey"
+            columns: ["keyword_id"]
+            isOneToOne: false
+            referencedRelation: "seo_keywords"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -1134,6 +1303,62 @@ export type Database = {
           },
         ]
       }
+      seo_recommendations: {
+        Row: {
+          action_items: Json | null
+          created_at: string | null
+          description: string | null
+          effort_score: number | null
+          id: string
+          impact_score: number | null
+          priority: string | null
+          recommendation_type: string | null
+          related_keyword_id: string | null
+          related_url: string | null
+          status: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          action_items?: Json | null
+          created_at?: string | null
+          description?: string | null
+          effort_score?: number | null
+          id?: string
+          impact_score?: number | null
+          priority?: string | null
+          recommendation_type?: string | null
+          related_keyword_id?: string | null
+          related_url?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          action_items?: Json | null
+          created_at?: string | null
+          description?: string | null
+          effort_score?: number | null
+          id?: string
+          impact_score?: number | null
+          priority?: string | null
+          recommendation_type?: string | null
+          related_keyword_id?: string | null
+          related_url?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_recommendations_related_keyword_id_fkey"
+            columns: ["related_keyword_id"]
+            isOneToOne: false
+            referencedRelation: "seo_keywords"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seo_topic_clusters: {
         Row: {
           cluster_name: string
@@ -1173,6 +1398,69 @@ export type Database = {
           published_articles_count?: number | null
           target_audience?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      seo_weekly_reports: {
+        Row: {
+          best_performing_articles: Json | null
+          competitor_movements: Json | null
+          created_at: string | null
+          email_sent: boolean | null
+          email_sent_at: string | null
+          id: string
+          keywords_gained: number | null
+          keywords_lost: number | null
+          monthly_traffic_growth: number | null
+          pdf_report_url: string | null
+          recommendations: Json | null
+          report_date: string
+          top_landing_pages: Json | null
+          top_ranking_keywords: Json | null
+          total_organic_traffic: number | null
+          week_end_date: string
+          week_start_date: string
+          weekly_traffic_growth: number | null
+        }
+        Insert: {
+          best_performing_articles?: Json | null
+          competitor_movements?: Json | null
+          created_at?: string | null
+          email_sent?: boolean | null
+          email_sent_at?: string | null
+          id?: string
+          keywords_gained?: number | null
+          keywords_lost?: number | null
+          monthly_traffic_growth?: number | null
+          pdf_report_url?: string | null
+          recommendations?: Json | null
+          report_date?: string
+          top_landing_pages?: Json | null
+          top_ranking_keywords?: Json | null
+          total_organic_traffic?: number | null
+          week_end_date: string
+          week_start_date: string
+          weekly_traffic_growth?: number | null
+        }
+        Update: {
+          best_performing_articles?: Json | null
+          competitor_movements?: Json | null
+          created_at?: string | null
+          email_sent?: boolean | null
+          email_sent_at?: string | null
+          id?: string
+          keywords_gained?: number | null
+          keywords_lost?: number | null
+          monthly_traffic_growth?: number | null
+          pdf_report_url?: string | null
+          recommendations?: Json | null
+          report_date?: string
+          top_landing_pages?: Json | null
+          top_ranking_keywords?: Json | null
+          total_organic_traffic?: number | null
+          week_end_date?: string
+          week_start_date?: string
+          weekly_traffic_growth?: number | null
         }
         Relationships: []
       }
