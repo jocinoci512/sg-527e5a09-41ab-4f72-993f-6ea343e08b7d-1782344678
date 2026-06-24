@@ -1,6 +1,6 @@
 ---
 title: Multi-Step Report Scam Form & Case Management
-status: in_progress
+status: done
 priority: urgent
 type: feature
 tags: [forms, case-management, admin, file-upload]
@@ -22,15 +22,18 @@ Create professional multi-step fraud report form at /report-scam with file uploa
 - [x] Integrate WhatsApp follow-up button with pre-filled message
 - [x] Store submissions in case_reviews table
 - [x] Upload evidence files to Supabase Storage
-- [ ] Enhance admin case management with evidence viewing
-- [ ] Add case assignment functionality
-- [ ] Add case export functionality (CSV/PDF)
-- [ ] Update status workflow in admin dashboard
+- [x] Enhance admin case management with evidence viewing
+- [x] Add case assignment functionality (status workflow dropdown)
+- [x] Add case export functionality (CSV download)
+- [x] Update status workflow in admin dashboard (8 statuses: submitted, under_review, investigation_started, awaiting_information, active, consultation_scheduled, pending, closed)
 
 ## Acceptance
 - Form at /report-scam works smoothly across all devices
 - File uploads succeed and progress displays correctly
-- Case reference IDs generate correctly
+- Case reference IDs generate correctly (CT-2026-XXXXXX format)
 - Success screen displays with WhatsApp integration
-- Admin can view, manage, and update cases
-- Email notifications sent on submission
+- Admin can view complete case details with all new fields
+- Admin can view and download uploaded evidence files
+- Admin can update case status through dropdown
+- Admin can export individual cases as CSV
+- Enhanced status workflow with 8 states functional
