@@ -111,6 +111,303 @@ export type Database = {
         }
         Relationships: []
       }
+      homepage_dashboard_metrics: {
+        Row: {
+          change: string
+          color: string
+          created_at: string | null
+          display_order: number
+          icon_name: string
+          id: string
+          is_enabled: boolean | null
+          label: string
+          updated_at: string | null
+          value: number
+        }
+        Insert: {
+          change: string
+          color?: string
+          created_at?: string | null
+          display_order?: number
+          icon_name: string
+          id?: string
+          is_enabled?: boolean | null
+          label: string
+          updated_at?: string | null
+          value: number
+        }
+        Update: {
+          change?: string
+          color?: string
+          created_at?: string | null
+          display_order?: number
+          icon_name?: string
+          id?: string
+          is_enabled?: boolean | null
+          label?: string
+          updated_at?: string | null
+          value?: number
+        }
+        Relationships: []
+      }
+      homepage_fraud_categories: {
+        Row: {
+          bg_color: string
+          cases: number
+          category: string
+          color: string
+          created_at: string | null
+          display_order: number
+          id: string
+          is_enabled: boolean | null
+          success_rate: number
+          trend: string
+          updated_at: string | null
+        }
+        Insert: {
+          bg_color?: string
+          cases: number
+          category: string
+          color?: string
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          is_enabled?: boolean | null
+          success_rate: number
+          trend: string
+          updated_at?: string | null
+        }
+        Update: {
+          bg_color?: string
+          cases?: number
+          category?: string
+          color?: string
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          is_enabled?: boolean | null
+          success_rate?: number
+          trend?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      homepage_global_regions: {
+        Row: {
+          countries: string
+          created_at: string | null
+          display_order: number
+          id: string
+          investigations: string
+          is_enabled: boolean | null
+          region: string
+          support: string
+          updated_at: string | null
+        }
+        Insert: {
+          countries: string
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          investigations: string
+          is_enabled?: boolean | null
+          region: string
+          support?: string
+          updated_at?: string | null
+        }
+        Update: {
+          countries?: string
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          investigations?: string
+          is_enabled?: boolean | null
+          region?: string
+          support?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      homepage_live_updates: {
+        Row: {
+          color: string
+          created_at: string | null
+          display_order: number
+          icon_name: string
+          id: string
+          is_enabled: boolean | null
+          location: string
+          message: string
+          time_ago: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          color?: string
+          created_at?: string | null
+          display_order?: number
+          icon_name: string
+          id?: string
+          is_enabled?: boolean | null
+          location: string
+          message: string
+          time_ago: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          color?: string
+          created_at?: string | null
+          display_order?: number
+          icon_name?: string
+          id?: string
+          is_enabled?: boolean | null
+          location?: string
+          message?: string
+          time_ago?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      homepage_statistics: {
+        Row: {
+          color: string
+          created_at: string | null
+          display_order: number
+          icon_name: string
+          id: string
+          is_enabled: boolean | null
+          label: string
+          prefix: string | null
+          suffix: string | null
+          updated_at: string | null
+          value: number
+        }
+        Insert: {
+          color?: string
+          created_at?: string | null
+          display_order?: number
+          icon_name: string
+          id?: string
+          is_enabled?: boolean | null
+          label: string
+          prefix?: string | null
+          suffix?: string | null
+          updated_at?: string | null
+          value: number
+        }
+        Update: {
+          color?: string
+          created_at?: string | null
+          display_order?: number
+          icon_name?: string
+          id?: string
+          is_enabled?: boolean | null
+          label?: string
+          prefix?: string | null
+          suffix?: string | null
+          updated_at?: string | null
+          value?: number
+        }
+        Relationships: []
+      }
+      homepage_success_stories: {
+        Row: {
+          amount: string
+          country: string
+          created_at: string | null
+          description: string
+          display_order: number
+          fraud_type: string
+          id: string
+          is_enabled: boolean | null
+          outcome: string
+          outcome_type: string
+          timeline: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: string
+          country: string
+          created_at?: string | null
+          description: string
+          display_order?: number
+          fraud_type: string
+          id?: string
+          is_enabled?: boolean | null
+          outcome: string
+          outcome_type: string
+          timeline: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: string
+          country?: string
+          created_at?: string | null
+          description?: string
+          display_order?: number
+          fraud_type?: string
+          id?: string
+          is_enabled?: boolean | null
+          outcome?: string
+          outcome_type?: string
+          timeline?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      homepage_testimonials: {
+        Row: {
+          amount: string
+          created_at: string | null
+          display_order: number
+          fraud_type: string
+          id: string
+          is_enabled: boolean | null
+          location: string
+          name: string
+          outcome: string
+          rating: number
+          role: string
+          text: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: string
+          created_at?: string | null
+          display_order?: number
+          fraud_type: string
+          id?: string
+          is_enabled?: boolean | null
+          location: string
+          name: string
+          outcome: string
+          rating?: number
+          role: string
+          text: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: string
+          created_at?: string | null
+          display_order?: number
+          fraud_type?: string
+          id?: string
+          is_enabled?: boolean | null
+          location?: string
+          name?: string
+          outcome?: string
+          rating?: number
+          role?: string
+          text?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           admin_id: string | null
