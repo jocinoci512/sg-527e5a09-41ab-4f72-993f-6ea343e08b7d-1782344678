@@ -63,7 +63,6 @@ export const publishingService = {
   // ============================================
 
   async publishPost(postId: string, adminEmail: string) {
-    // Get the post
     const { data: post, error: fetchError } = await supabase
       .from("blog_posts")
       .select("*")
@@ -73,19 +72,16 @@ export const publishingService = {
     if (fetchError) throw fetchError;
     if (!post) throw new Error("Post not found");
 
-    // Validate
     const validation = this.validateBlogPost(post);
     if (!validation.isValid) {
       throw new Error(`Validation failed: ${validation.errors.join(", ")}`);
     }
 
-    // Check slug uniqueness
     const isUnique = await this.checkSlugUniqueness(post.slug, postId);
     if (!isUnique) {
       throw new Error("Slug is already in use by another post");
     }
 
-    // Update to published
     const { data: published, error: publishError } = await supabase
       .from("blog_posts")
       .update({
@@ -100,14 +96,12 @@ export const publishingService = {
 
     if (publishError) throw publishError;
 
-    // Log activity
     await seoAnalyticsService.logActivity({
       admin_email: adminEmail,
       action_type: "blog_publish",
       action_description: `Published blog post: ${post.title}`,
       entity_type: "blog_post",
-      entity_id: postId,
-      metadata: { slug: post.slug }
+      entity_id: postId
     });
 
     return published;
@@ -187,7 +181,6 @@ export const publishingService = {
     if (fetchError) throw fetchError;
     if (!post) throw new Error("Post not found");
 
-    // Validate
     const validation = this.validateBlogPost(post);
     if (!validation.isValid) {
       throw new Error(`Validation failed: ${validation.errors.join(", ")}`);
@@ -211,8 +204,7 @@ export const publishingService = {
       action_type: "blog_schedule",
       action_description: `Scheduled blog post: ${post.title} for ${publishDate.toLocaleDateString()}`,
       entity_type: "blog_post",
-      entity_id: postId,
-      metadata: { scheduled_date: publishDate.toISOString() }
+      entity_id: postId
     });
 
     return data;
@@ -248,10 +240,6 @@ export const publishingService = {
 
     return data;
   },
-
-  // ============================================
-  // VALIDATION HELPERS
-  // ============================================
 
   async validateAndStoreErrors(postId: string) {
     const { data: post, error } = await supabase
