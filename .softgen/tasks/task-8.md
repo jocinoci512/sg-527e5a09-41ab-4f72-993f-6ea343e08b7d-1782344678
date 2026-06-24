@@ -1,7 +1,6 @@
-
 ---
 title: Admin Dashboard - CMS and Operations
-status: todo
+status: in_progress
 priority: medium
 type: feature
 tags: [admin, cms, content]
@@ -21,4 +20,4 @@ The content management wing of the admin dashboard, allowing staff to update the
 ## Acceptance
 - Admins have UI tools to publish new blog posts and manage FAQs.
 - Content updates in the CMS reflect on the public-facing frontend.
-  
+ 
