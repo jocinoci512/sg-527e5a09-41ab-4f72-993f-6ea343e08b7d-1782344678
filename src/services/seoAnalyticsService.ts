@@ -276,11 +276,19 @@ export const seoAnalyticsService = {
     action_description?: string;
     entity_type?: string;
     entity_id?: string;
-    metadata?: any;
   }) {
     const { data, error } = await supabase
       .from("admin_activity_log")
-      .insert(activityData)
+      .insert({
+        admin_email: activityData.admin_email,
+        action_type: activityData.action_type,
+        action_description: activityData.action_description || null,
+        entity_type: activityData.entity_type || null,
+        entity_id: activityData.entity_id || null,
+        metadata: null,
+        ip_address: null,
+        user_agent: null
+      } as any)
       .select()
       .single();
 
