@@ -1,5 +1,6 @@
 import { Layout } from "@/components/Layout";
 import { SEO } from "@/components/SEO";
+import Link from "next/link";
 
 export default function Privacy() {
   return (
@@ -166,7 +167,7 @@ export default function Privacy() {
           <section className="mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-4 font-heading">8. Cookies and Tracking</h2>
             <p className="text-muted-foreground mb-4">
-              Our website uses cookies and similar tracking technologies to enhance user experience and analyze website traffic. For detailed information, please see our <a href="/cookies" className="text-primary hover:underline">Cookie Policy</a>.
+              Our website uses cookies and similar tracking technologies to enhance user experience and analyze website traffic. For detailed information, please see our <Link href="/cookies" className="text-primary hover:underline">Cookie Policy</Link>.
             </p>
           </section>
 

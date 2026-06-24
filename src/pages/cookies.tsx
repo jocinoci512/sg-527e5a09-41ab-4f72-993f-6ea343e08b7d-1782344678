@@ -1,5 +1,6 @@
 import { Layout } from "@/components/Layout";
 import { SEO } from "@/components/SEO";
+import Link from "next/link";
 
 export default function Cookies() {
   return (
@@ -159,7 +160,7 @@ export default function Cookies() {
           <section className="mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-4 font-heading">9. More Information</h2>
             <p className="text-muted-foreground mb-4">
-              For more information about how we handle your data, please review our <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>.
+              For more information about how we handle your data, please review our <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
             </p>
           </section>
 

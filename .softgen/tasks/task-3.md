@@ -1,6 +1,6 @@
 ---
 title: About Us and Legal Framework
-status: in_progress
+status: done
 priority: high
 type: feature
 tags: [content, legal]

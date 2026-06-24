@@ -1,10 +1,9 @@
-
 ---
 title: Services and Scam Types Directory
-status: todo
+status: in_progress
 priority: high
 type: feature
-tags: [services, directory, content]
+tags: [services, scams, content]
 position: 4
 ---
 
@@ -21,4 +20,4 @@ The platform requires extensive SEO-optimized content hubs for both what they do
 ## Acceptance
 - Users can navigate through distinct categories of services and scam types.
 - Detail pages follow a structured, professional layout with consistent calls to action.
-  
+ 
