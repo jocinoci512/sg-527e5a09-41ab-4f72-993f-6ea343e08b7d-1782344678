@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { X, Bell } from "lucide-react";
+import { X, Bell, Volume2, VolumeX } from "lucide-react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 interface Notification {
@@ -82,27 +83,24 @@ export function NotificationPopup({ notification, onClose, soundEnabled = true }
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="grid grid-cols-2 gap-2 text-sm">
+        <CardContent className="space-y-4">
+          <div className="space-y-2 text-sm">
             <div>
-              <p className="text-muted-foreground text-xs">Name</p>
-              <p className="font-medium">{notification.fullName}</p>
+              <span className="font-medium">Name:</span> {notification.fullName}
             </div>
             <div>
-              <p className="text-muted-foreground text-xs">Country</p>
-              <p className="font-medium">{notification.country}</p>
+              <span className="font-medium">Country:</span> {notification.country}
             </div>
             <div>
-              <p className="text-muted-foreground text-xs">Scam Type</p>
-              <p className="font-medium">{notification.scamType}</p>
+              <span className="font-medium">Scam Type:</span> {notification.scamType}
             </div>
-            <div>
-              <p className="text-muted-foreground text-xs">Time</p>
-              <p className="font-medium">{new Date(notification.createdAt).toLocaleTimeString()}</p>
+            <div className="text-xs text-muted-foreground">
+              {new Date(notification.timestamp).toLocaleString()}
             </div>
           </div>
-          <Button variant="outline" size="sm" className="w-full mt-3" asChild>
-            <a href="/admin/cases">View All Cases</a>
+
+          <Button asChild className="w-full">
+            <Link href="/admin/cases">View All Cases</Link>
           </Button>
         </CardContent>
       </Card>
