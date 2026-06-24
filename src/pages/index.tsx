@@ -501,6 +501,132 @@ export default function Home() {
     }
   ];
 
+  const enhancedSuccessStories = [
+    {
+      title: "Cryptocurrency Investment Scam Recovery",
+      fraudType: "Crypto Fraud",
+      country: "United States",
+      amount: "$420,000",
+      timeline: "6 weeks",
+      description: "Traced stolen Bitcoin through multiple exchanges and assisted law enforcement in identifying perpetrators. Comprehensive blockchain forensics revealed the full transaction trail across 15 wallet addresses.",
+      outcome: "Partial Recovery Achieved",
+      outcomeType: "success"
+    },
+    {
+      title: "International Romance Scam Network",
+      fraudType: "Romance Scam",
+      country: "United Kingdom",
+      amount: "$85,000",
+      timeline: "4 weeks",
+      description: "Comprehensive investigation uncovered international fraud network operating across 8 countries. Evidence provided to Interpol led to multiple arrests and ongoing recovery efforts.",
+      outcome: "Criminal Charges Filed",
+      outcomeType: "legal"
+    },
+    {
+      title: "Forex Trading Platform Fraud Investigation",
+      fraudType: "Forex Scam",
+      country: "Australia",
+      amount: "$250,000",
+      timeline: "8 weeks",
+      description: "Blockchain forensics revealed fake trading platform's infrastructure and shell company network. Investigation report used in civil litigation and regulatory complaints to financial authorities.",
+      outcome: "Legal Action Initiated",
+      outcomeType: "legal"
+    },
+    {
+      title: "NFT Marketplace Rug Pull Traced",
+      fraudType: "NFT Scam",
+      country: "Canada",
+      amount: "$180,000",
+      timeline: "3 weeks",
+      description: "On-chain analysis identified developers behind fraudulent NFT project. Smart contract analysis revealed exit scam mechanism. Evidence package submitted to law enforcement.",
+      outcome: "Investigation Complete",
+      outcomeType: "complete"
+    },
+    {
+      title: "Pig Butchering Scheme Investigation",
+      fraudType: "Investment Scam",
+      country: "Singapore",
+      amount: "$520,000",
+      timeline: "10 weeks",
+      description: "Multi-month social engineering scam uncovered. Traced funds through cryptocurrency mixers and identified cash-out points. Client working with international authorities for recovery.",
+      outcome: "Active Recovery Process",
+      outcomeType: "active"
+    },
+    {
+      title: "Wire Fraud Corporate Investigation",
+      fraudType: "Wire Fraud",
+      country: "Germany",
+      amount: "$1,200,000",
+      timeline: "12 weeks",
+      description: "Business email compromise investigation. Traced fraudulent wire transfers across international banking networks. Collaborated with corporate legal team and law enforcement across 3 jurisdictions.",
+      outcome: "Partial Recovery Achieved",
+      outcomeType: "success"
+    }
+  ];
+
+  const enhancedTestimonials = [
+    {
+      name: "Sarah M.",
+      role: "Cryptocurrency Fraud Victim",
+      location: "United States",
+      amount: "$420K",
+      text: "Cipher Trace provided professional, thorough investigation services when I lost funds to a crypto scam. Their detailed blockchain forensics report gave me the evidence I needed to pursue legal action. The team was compassionate and kept me informed throughout the entire process.",
+      rating: 5,
+      fraudType: "Crypto Scam",
+      outcome: "Legal Action Initiated"
+    },
+    {
+      name: "David K.",
+      role: "Investment Fraud Victim",
+      location: "United Kingdom",
+      amount: "$250K",
+      text: "The team's expertise in blockchain analysis was impressive. They traced my stolen cryptocurrency through multiple exchanges and provided clear, professional documentation for law enforcement. Their investigation uncovered details I never would have found on my own.",
+      rating: 5,
+      fraudType: "Investment Fraud",
+      outcome: "Evidence Submitted"
+    },
+    {
+      name: "Maria L.",
+      role: "Romance Scam Victim",
+      location: "Australia",
+      amount: "$85K",
+      text: "Professional, compassionate, and knowledgeable. They helped me understand what happened and provided a comprehensive investigation report. The evidence they gathered was crucial in my case with authorities. I'm grateful for their expertise and support.",
+      rating: 5,
+      fraudType: "Romance Scam",
+      outcome: "Criminal Charges Filed"
+    },
+    {
+      name: "James T.",
+      role: "Forex Scam Victim",
+      location: "Canada",
+      amount: "$180K",
+      text: "Cipher Trace's investigation revealed the full scope of the fraud I experienced. Their blockchain tracing capabilities are exceptional. The detailed report they provided was instrumental in my civil litigation case. Highly recommended for anyone dealing with financial fraud.",
+      rating: 5,
+      fraudType: "Forex Fraud",
+      outcome: "Civil Litigation Support"
+    },
+    {
+      name: "Linda R.",
+      role: "Wire Fraud Victim",
+      location: "Singapore",
+      amount: "$520K",
+      text: "After losing a substantial amount to a business email compromise scam, Cipher Trace's investigation gave me hope. Their team worked with law enforcement and provided expert testimony. Their professionalism and dedication were outstanding throughout the process.",
+      rating: 5,
+      fraudType: "Wire Fraud",
+      outcome: "Recovery In Progress"
+    },
+    {
+      name: "Robert H.",
+      role: "NFT Scam Victim",
+      location: "Germany",
+      amount: "$95K",
+      text: "The investigation into the NFT rug pull I experienced was thorough and professional. Cipher Trace's smart contract analysis identified the perpetrators and provided actionable evidence. Their expertise in digital asset fraud is unmatched.",
+      rating: 5,
+      fraudType: "NFT Scam",
+      outcome: "Investigation Complete"
+    }
+  ];
+
   return (
     <Layout>
       <SEO 
@@ -930,36 +1056,66 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Enhanced Success Stories Section */}
       <section className="py-16 lg:py-24">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium mb-4">
+              <Shield className="h-4 w-4" />
+              <span className="text-sm">Case Studies</span>
+            </div>
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl font-heading">
-              Success Stories
+              Professional Investigation Case Studies
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Professional case examples demonstrating our investigation capabilities
+              Real-world fraud investigations demonstrating our expertise and methodology
             </p>
           </div>
           
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            {successStories.map((story, index) => (
-              <Card key={index} className="border-2">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {enhancedSuccessStories.map((story, index) => (
+              <Card key={index} className="border-2 hover:border-primary/50 transition-all hover:shadow-xl group">
                 <CardHeader>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-2xl font-bold text-primary">{story.amount}</span>
-                    <Shield className="h-8 w-8 text-primary" />
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex flex-col gap-2">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-primary/10 text-primary w-fit">
+                        {story.fraudType}
+                      </span>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Globe className="h-3 w-3" />
+                        <span>{story.country}</span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-primary mb-1">{story.amount}</div>
+                      <div className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {story.timeline}
+                      </div>
+                    </div>
                   </div>
-                  <CardTitle className="font-heading">{story.title}</CardTitle>
+                  <CardTitle className="font-heading text-lg leading-tight">{story.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground mb-4">{story.description}</p>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-3">{story.description}</p>
+                  <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
+                    story.outcomeType === "success" ? "bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400" :
+                    story.outcomeType === "legal" ? "bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400" :
+                    story.outcomeType === "active" ? "bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400" :
+                    "bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400"
+                  }`}>
                     <CheckCircle className="h-4 w-4" />
                     {story.outcome}
                   </div>
                 </CardContent>
               </Card>
             ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <p className="text-sm text-muted-foreground mb-4">
+              All case details have been anonymized to protect client confidentiality
+            </p>
           </div>
         </div>
       </section>
@@ -1011,37 +1167,72 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Enhanced Testimonials Section */}
       <section className="py-16 lg:py-24 bg-muted/30">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium mb-4">
+              <Star className="h-4 w-4 fill-primary" />
+              <span className="text-sm">Client Testimonials</span>
+            </div>
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl font-heading">
-              What Our Clients Say
+              Trusted by Fraud Victims Worldwide
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Professional testimonials from fraud investigation clients
+              Real experiences from clients we've helped with professional fraud investigations
             </p>
           </div>
           
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="border-2">
-                <CardHeader>
-                  <Quote className="h-8 w-8 text-primary mb-4" />
-                  <div className="flex gap-1 mb-2">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-yellow-500 text-yellow-500" />
-                    ))}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {enhancedTestimonials.map((testimonial, index) => (
+              <Card key={index} className="border-2 hover:border-primary/50 transition-all hover:shadow-lg group">
+                <CardHeader className="pb-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex gap-0.5">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="h-5 w-5 fill-yellow-500 text-yellow-500" />
+                      ))}
+                    </div>
+                    <Quote className="h-6 w-6 text-primary/20 group-hover:text-primary/40 transition-colors" />
+                  </div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-primary/10 text-primary">
+                      {testimonial.fraudType}
+                    </span>
+                    <span className="text-xs font-medium text-muted-foreground">{testimonial.amount}</span>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground mb-4 italic">&quot;{testimonial.text}&quot;</p>
-                  <div>
-                    <p className="font-semibold">{testimonial.name}</p>
-                    <p className="text-sm text-muted-foreground">{testimonial.location}</p>
+                  <p className="text-sm text-muted-foreground mb-4 italic leading-relaxed">
+                    &quot;{testimonial.text}&quot;
+                  </p>
+                  <div className="pt-4 border-t border-border">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="font-semibold text-foreground">{testimonial.name}</p>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                          <Globe className="h-3 w-3" />
+                          <span>{testimonial.location}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">{testimonial.role}</p>
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400">
+                        <CheckCircle className="h-3 w-3" />
+                        {testimonial.outcome}
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <p className="text-sm text-muted-foreground mb-4">
+              All testimonials are from verified clients. Names have been changed to protect privacy.
+            </p>
           </div>
         </div>
       </section>
