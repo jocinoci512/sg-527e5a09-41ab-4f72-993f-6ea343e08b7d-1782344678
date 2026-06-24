@@ -24,13 +24,16 @@ export default function CaseReview() {
     try {
       const formData = new FormData(e.currentTarget);
       
+      const amountString = formData.get("amountLost") as string;
+      const amountNumber = parseFloat(amountString.replace(/[^0-9.-]+/g, "")) || 0;
+      
       const caseData = {
         full_name: formData.get("fullName") as string,
         email: formData.get("email") as string,
         phone: formData.get("phone") as string,
         country: formData.get("country") as string,
         scam_type: formData.get("scamType") as string,
-        amount_lost: formData.get("amountLost") as string,
+        amount_lost: amountNumber,
         cryptocurrency_used: formData.get("cryptocurrency") as string || null,
         wallet_address: formData.get("walletAddress") as string || null,
         scammer_website: formData.get("scammerWebsite") as string || null,
