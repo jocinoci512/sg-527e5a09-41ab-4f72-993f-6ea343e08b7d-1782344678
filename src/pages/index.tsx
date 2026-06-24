@@ -105,32 +105,38 @@ export default function Home() {
     {
       icon: Shield,
       title: "Cryptocurrency Fraud Investigation",
-      description: "Professional blockchain tracing and digital asset investigation services for cryptocurrency scam victims."
+      description: "Professional blockchain tracing and digital asset investigation services for cryptocurrency scam victims.",
+      href: "/services/crypto-fraud"
     },
     {
       icon: Search,
       title: "Blockchain Transaction Tracing",
-      description: "Advanced forensic analysis of blockchain transactions to identify and track stolen digital assets."
+      description: "Advanced forensic analysis of blockchain transactions to identify and track stolen digital assets.",
+      href: "/services"
     },
     {
       icon: FileText,
       title: "Digital Asset Recovery Consultation",
-      description: "Expert guidance on recovery strategies, legal options, and evidence documentation."
+      description: "Expert guidance on recovery strategies, legal options, and evidence documentation.",
+      href: "/services"
     },
     {
       icon: Globe,
       title: "Investment Scam Investigation",
-      description: "Comprehensive investigation services for victims of fraudulent investment schemes."
+      description: "Comprehensive investigation services for victims of fraudulent investment schemes.",
+      href: "/services"
     },
     {
       icon: Heart,
       title: "Romance Scam Investigation",
-      description: "Specialized investigation and evidence gathering for romance fraud cases."
+      description: "Specialized investigation and evidence gathering for romance fraud cases.",
+      href: "/services"
     },
     {
       icon: AlertTriangle,
       title: "Scam Victim Support",
-      description: "Confidential support, professional guidance, and recovery consultation for fraud victims."
+      description: "Confidential support, professional guidance, and recovery consultation for fraud victims.",
+      href: "/services"
     }
   ];
 
@@ -138,22 +144,30 @@ export default function Home() {
     {
       icon: Coins,
       title: "Cryptocurrency Scams",
-      description: "Bitcoin fraud, fake exchanges, pump and dump schemes"
+      description: "Bitcoin fraud, fake exchanges, pump and dump schemes",
+      color: "text-orange-600",
+      href: "/scams"
     },
     {
       icon: TrendingUp,
       title: "Investment Scams",
-      description: "Ponzi schemes, fake trading platforms, fraudulent investment opportunities"
+      description: "Ponzi schemes, fake trading platforms, fraudulent investment opportunities",
+      color: "text-blue-600",
+      href: "/scams"
     },
     {
       icon: Heart,
       title: "Romance Scams",
-      description: "Online dating fraud, catfishing, emotional manipulation"
+      description: "Online dating fraud, catfishing, emotional manipulation",
+      color: "text-pink-600",
+      href: "/scams/pig-butchering"
     },
     {
       icon: DollarSign,
       title: "Forex & Trading Scams",
-      description: "Fake forex platforms, binary options fraud, trading signal scams"
+      description: "Fake forex platforms, binary options fraud, trading signal scams",
+      color: "text-green-600",
+      href: "/scams"
     }
   ];
 
@@ -405,21 +419,24 @@ export default function Home() {
       excerpt: "Learn about the most common cryptocurrency scams and how to protect yourself from fraud.",
       category: "Fraud Prevention",
       date: "2026-06-15",
-      readTime: "8 min read"
+      readTime: "8 min read",
+      href: "/blog"
     },
     {
       title: "Blockchain Forensics: How We Trace Stolen Cryptocurrency",
       excerpt: "An inside look at the professional tools and techniques used in blockchain investigation.",
       category: "Blockchain Intelligence",
       date: "2026-06-10",
-      readTime: "10 min read"
+      readTime: "10 min read",
+      href: "/blog"
     },
     {
       title: "Romance Scams: Red Flags and Recovery Options",
       excerpt: "Identifying romance fraud warning signs and steps to take if you've been victimized.",
       category: "Scam Alerts",
       date: "2026-06-05",
-      readTime: "6 min read"
+      readTime: "6 min read",
+      href: "/blog"
     }
   ];
 
