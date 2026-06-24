@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Bell, Plus, Edit, Trash2, Sparkles, Network, FileText, TrendingUp, Eye, Target, Zap } from "lucide-react";
+import { Bell, Plus, Edit, Trash2, Sparkles, Network, FileText, TrendingUp, Eye, Target, Zap, Upload, BarChart3, LineChart, PieChart } from "lucide-react";
 import { seoContentService } from "@/services/seoContentService";
 import { useToast } from "@/hooks/use-toast";
 
@@ -24,6 +24,9 @@ export default function AdminSEOContent() {
   const [editingCluster, setEditingCluster] = useState<any>(null);
   const [isKeywordDialogOpen, setIsKeywordDialogOpen] = useState(false);
   const [isClusterDialogOpen, setIsClusterDialogOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [importData, setImportData] = useState("");
+  const [importPreview, setImportPreview] = useState<any[]>([]);
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
   const { toast } = useToast();
@@ -52,6 +55,89 @@ export default function AdminSEOContent() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleImportKeywords = () => {
+    setImportData("");
+    setImportPreview([]);
+    setIsImportDialogOpen(true);
+  };
+
+  const parseImportData = () => {
+    try {
+      const lines = importData.trim().split("\n");
+      const parsed = [];
+
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        
+        // Support CSV format: keyword,type,cluster,priority,search_volume
+        const parts = line.split(",").map(p => p.trim());
+        
+        if (parts.length >= 1) {
+          const keyword = parts[0];
+          const type = parts[1] || "primary";
+          const clusterName = parts[2] || "";
+          const priority = parseInt(parts[3]) || 5;
+          const searchVolume = parseInt(parts[4]) || 0;
+          
+          // Find cluster by name
+          const cluster = clusters.find(c => 
+            c.cluster_name.toLowerCase().includes(clusterName.toLowerCase())
+          );
+
+          parsed.push({
+            keyword,
+            keyword_type: type,
+            cluster_id: cluster?.id || clusters[0]?.id,
+            cluster_name: cluster?.cluster_name || clusters[0]?.cluster_name,
+            priority,
+            search_volume: searchVolume,
+            competition_level: "medium",
+            content_status: "pending"
+          });
+        }
+      }
+
+      setImportPreview(parsed);
+      toast({
+        title: "Preview Ready",
+        description: `Parsed ${parsed.length} keywords. Review and confirm to import.`
+      });
+    } catch (error) {
+      console.error("Error parsing import data:", error);
+      toast({
+        title: "Parse Error",
+        description: "Could not parse import data. Check format and try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const confirmBulkImport = async () => {
+    try {
+      for (const keywordData of importPreview) {
+        const { cluster_name, ...dataToInsert } = keywordData;
+        await seoContentService.createKeyword(dataToInsert);
+      }
+
+      toast({
+        title: "Keywords Imported",
+        description: `Successfully imported ${importPreview.length} keywords`
+      });
+
+      setIsImportDialogOpen(false);
+      setImportData("");
+      setImportPreview([]);
+      loadAllData();
+    } catch (error) {
+      console.error("Error importing keywords:", error);
+      toast({
+        title: "Import Failed",
+        description: "Could not import all keywords",
+        variant: "destructive"
+      });
     }
   };
 
@@ -211,6 +297,18 @@ export default function AdminSEOContent() {
     );
   };
 
+  // Analytics calculations
+  const analyticsData = {
+    totalSearchVolume: keywords.reduce((sum, k) => sum + (k.search_volume || 0), 0),
+    avgPriority: keywords.length > 0 
+      ? (keywords.reduce((sum, k) => sum + k.priority, 0) / keywords.length).toFixed(1)
+      : 0,
+    publishedContent: templates.filter(t => t.status === "published").length,
+    conversionRate: templates.length > 0
+      ? ((templates.filter(t => t.status === "published").length / templates.length) * 100).toFixed(1)
+      : 0
+  };
+
   return (
     <div className="min-h-screen bg-muted/30">
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -259,6 +357,10 @@ export default function AdminSEOContent() {
             </p>
           </div>
           <div className="flex gap-2">
+            <Button onClick={handleImportKeywords} variant="outline">
+              <Upload className="mr-2 h-4 w-4" />
+              Import Keywords
+            </Button>
             {selectedKeywords.length > 0 && (
               <Button onClick={handleBulkGenerate} disabled={generating} size="lg">
                 <Zap className="mr-2 h-5 w-5" />
@@ -319,7 +421,7 @@ export default function AdminSEOContent() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="keywords">
               <Target className="mr-2 h-4 w-4" />
               Keywords ({keywords.length})
@@ -335,6 +437,10 @@ export default function AdminSEOContent() {
             <TabsTrigger value="bulk">
               <Zap className="mr-2 h-4 w-4" />
               Bulk Generator
+            </TabsTrigger>
+            <TabsTrigger value="analytics">
+              <TrendingUp className="mr-2 h-4 w-4" />
+              Analytics
             </TabsTrigger>
           </TabsList>
 
@@ -647,7 +753,263 @@ export default function AdminSEOContent() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* ANALYTICS TAB */}
+          <TabsContent value="analytics" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* SEO Performance Overview */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5 text-primary" />
+                    SEO Performance Metrics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Search Volume</p>
+                      <p className="text-2xl font-bold">{analyticsData.totalSearchVolume.toLocaleString()}</p>
+                    </div>
+                    <TrendingUp className="h-8 w-8 text-green-500" />
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Avg Keyword Priority</p>
+                      <p className="text-2xl font-bold">{analyticsData.avgPriority}/10</p>
+                    </div>
+                    <Target className="h-8 w-8 text-blue-500" />
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Content Conversion Rate</p>
+                      <p className="text-2xl font-bold">{analyticsData.conversionRate}%</p>
+                    </div>
+                    <Sparkles className="h-8 w-8 text-purple-500" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Keyword Distribution */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <PieChart className="h-5 w-5 text-primary" />
+                    Keyword Distribution
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Primary Keywords</span>
+                      <span className="font-semibold">
+                        {keywords.filter(k => k.keyword_type === "primary").length}
+                      </span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div 
+                        className="bg-blue-500 h-2 rounded-full" 
+                        style={{ 
+                          width: `${(keywords.filter(k => k.keyword_type === "primary").length / keywords.length) * 100}%` 
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Secondary Keywords</span>
+                      <span className="font-semibold">
+                        {keywords.filter(k => k.keyword_type === "secondary").length}
+                      </span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div 
+                        className="bg-green-500 h-2 rounded-full" 
+                        style={{ 
+                          width: `${(keywords.filter(k => k.keyword_type === "secondary").length / keywords.length) * 100}%` 
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Long Tail Keywords</span>
+                      <span className="font-semibold">
+                        {keywords.filter(k => k.keyword_type === "long_tail").length}
+                      </span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div 
+                        className="bg-purple-500 h-2 rounded-full" 
+                        style={{ 
+                          width: `${(keywords.filter(k => k.keyword_type === "long_tail").length / keywords.length) * 100}%` 
+                        }}
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Content Status Breakdown */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <LineChart className="h-5 w-5 text-primary" />
+                    Content Pipeline Status
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {["pending", "drafted", "published", "optimized"].map(status => {
+                      const count = keywords.filter(k => k.content_status === status).length;
+                      const percentage = keywords.length > 0 ? (count / keywords.length) * 100 : 0;
+                      return (
+                        <div key={status} className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              {getStatusBadge(status)}
+                            </div>
+                            <span className="text-sm font-semibold">{count} ({percentage.toFixed(0)}%)</span>
+                          </div>
+                          <div className="w-full bg-muted rounded-full h-2">
+                            <div 
+                              className="bg-primary h-2 rounded-full transition-all" 
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Top Performing Clusters */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Network className="h-5 w-5 text-primary" />
+                    Top Performing Clusters
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {clusters
+                      .sort((a, b) => b.priority - a.priority)
+                      .slice(0, 5)
+                      .map((cluster) => {
+                        const clusterKeywords = keywords.filter(k => k.cluster_id === cluster.id);
+                        return (
+                          <div key={cluster.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                            <div>
+                              <p className="font-medium">{cluster.cluster_name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {clusterKeywords.length} keywords
+                              </p>
+                            </div>
+                            <Badge variant="outline">Priority: {cluster.priority}/10</Badge>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Google Search Console Integration Info */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Google Search Console Integration (Coming Soon)</CardTitle>
+                <CardDescription>
+                  Connect Google Search Console to track real organic traffic, impressions, CTR, and keyword rankings
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="p-4 bg-muted rounded-lg space-y-2">
+                  <p className="text-sm font-medium">Future Analytics Features:</p>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>✓ Real-time keyword ranking tracking</li>
+                    <li>✓ Organic traffic growth charts</li>
+                    <li>✓ Click-through rate (CTR) analysis</li>
+                    <li>✓ Search impressions monitoring</li>
+                    <li>✓ Page-level performance metrics</li>
+                    <li>✓ Automated SEO recommendations</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
+
+        {/* Bulk Import Dialog */}
+        <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Bulk Import Keywords</DialogTitle>
+              <DialogDescription>
+                Import multiple keywords at once using CSV format
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-muted rounded-lg">
+                <p className="text-sm font-medium mb-2">CSV Format:</p>
+                <code className="text-xs">
+                  keyword,type,cluster,priority,search_volume
+                </code>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Example: crypto scam recovery,primary,Cryptocurrency Recovery,8,1200
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Type: primary, secondary, long_tail, semantic
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="import_data">Paste your keyword list (one per line)</Label>
+                <Textarea
+                  id="import_data"
+                  value={importData}
+                  onChange={(e) => setImportData(e.target.value)}
+                  placeholder="crypto scam recovery,primary,Cryptocurrency Recovery,8,1200&#10;blockchain fraud investigation,primary,Blockchain Tracing,9,800&#10;recover stolen bitcoin,long_tail,Cryptocurrency Recovery,7,450"
+                  rows={12}
+                  className="font-mono text-sm"
+                />
+              </div>
+
+              <Button onClick={parseImportData} variant="outline" className="w-full">
+                Parse & Preview
+              </Button>
+
+              {importPreview.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium">Preview ({importPreview.length} keywords)</p>
+                    <Button onClick={confirmBulkImport} size="sm">
+                      Confirm Import
+                    </Button>
+                  </div>
+                  <div className="max-h-60 overflow-y-auto space-y-2 border rounded-lg p-3">
+                    {importPreview.slice(0, 10).map((item, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-muted rounded text-sm">
+                        <span className="font-medium">{item.keyword}</span>
+                        <div className="flex items-center gap-2">
+                          {getTypeBadge(item.keyword_type)}
+                          <Badge variant="outline">{item.cluster_name}</Badge>
+                          <Badge variant="outline">P:{item.priority}</Badge>
+                        </div>
+                      </div>
+                    ))}
+                    {importPreview.length > 10 && (
+                      <p className="text-xs text-muted-foreground text-center pt-2">
+                        ...and {importPreview.length - 10} more
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Keyword Dialog */}
         <Dialog open={isKeywordDialogOpen} onOpenChange={setIsKeywordDialogOpen}>
