@@ -1,10 +1,159 @@
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, HelpCircle, Star, Activity, Bell } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Bell, Save, Type, Layout as LayoutIcon } from "lucide-react";
+import { contentService } from "@/services/contentService";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminContent() {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [sections, setSections] = useState<Record<string, any>>({});
+  const { toast } = useToast();
+
+  const contentSections = [
+    {
+      page: "homepage",
+      label: "Homepage",
+      sections: [
+        { key: "hero_headline", label: "Hero Headline", type: "text" },
+        { key: "hero_subheadline", label: "Hero Subheadline", type: "textarea" },
+        { key: "hero_cta_primary", label: "Primary CTA Button", type: "text" },
+        { key: "hero_cta_secondary", label: "Secondary CTA Button", type: "text" },
+        { key: "about_headline", label: "About Section Headline", type: "text" },
+        { key: "about_description", label: "About Section Description", type: "textarea" },
+        { key: "services_headline", label: "Services Headline", type: "text" },
+        { key: "services_description", label: "Services Description", type: "textarea" }
+      ]
+    },
+    {
+      page: "about",
+      label: "About Page",
+      sections: [
+        { key: "about_hero_headline", label: "Hero Headline", type: "text" },
+        { key: "about_hero_description", label: "Hero Description", type: "textarea" },
+        { key: "mission_headline", label: "Mission Headline", type: "text" },
+        { key: "mission_text", label: "Mission Text", type: "textarea" },
+        { key: "vision_headline", label: "Vision Headline", type: "text" },
+        { key: "vision_text", label: "Vision Text", type: "textarea" }
+      ]
+    },
+    {
+      page: "services",
+      label: "Services Page",
+      sections: [
+        { key: "services_hero_headline", label: "Hero Headline", type: "text" },
+        { key: "services_hero_description", label: "Hero Description", type: "textarea" },
+        { key: "services_cta", label: "CTA Button Text", type: "text" }
+      ]
+    },
+    {
+      page: "contact",
+      label: "Contact Page",
+      sections: [
+        { key: "contact_hero_headline", label: "Hero Headline", type: "text" },
+        { key: "contact_hero_description", label: "Hero Description", type: "textarea" },
+        { key: "contact_form_title", label: "Form Title", type: "text" },
+        { key: "contact_form_description", label: "Form Description", type: "textarea" }
+      ]
+    },
+    {
+      page: "footer",
+      label: "Footer",
+      sections: [
+        { key: "footer_company_description", label: "Company Description", type: "textarea" },
+        { key: "footer_email", label: "Email Address", type: "text" },
+        { key: "footer_phone", label: "Phone Number", type: "text" },
+        { key: "footer_whatsapp", label: "WhatsApp Number", type: "text" }
+      ]
+    }
+  ];
+
+  useEffect(() => {
+    loadAllContent();
+  }, []);
+
+  const loadAllContent = async () => {
+    try {
+      setLoading(true);
+      const data = await contentService.getAllContent();
+      const mapped = data.reduce((acc: any, item: any) => {
+        acc[item.section_key] = item;
+        return acc;
+      }, {});
+      setSections(mapped);
+    } catch (error) {
+      console.error("Error loading content:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async (page: string) => {
+    try {
+      setSaving(true);
+      const pageConfig = contentSections.find(p => p.page === page);
+      if (!pageConfig) return;
+
+      for (const section of pageConfig.sections) {
+        const sectionData = sections[section.key];
+        const payload = {
+          section_key: section.key,
+          section_label: section.label,
+          page_name: page,
+          content_value: sectionData?.content_value || ""
+        };
+
+        if (sectionData?.id) {
+          await contentService.updateContent(section.key, payload);
+        } else {
+          await contentService.createContent(payload);
+        }
+      }
+
+      toast({
+        title: "Content Saved",
+        description: `${pageConfig.label} content has been updated`,
+      });
+
+      await loadAllContent();
+    } catch (error) {
+      console.error("Error saving content:", error);
+      toast({
+        title: "Save Failed",
+        description: "Could not save content changes",
+        variant: "destructive"
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const updateField = (sectionKey: string, value: string) => {
+    setSections(prev => ({
+      ...prev,
+      [sectionKey]: {
+        ...prev[sectionKey],
+        content_value: value,
+        section_key: sectionKey
+      }
+    }));
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center">
+        <div className="text-muted-foreground">Loading content...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-muted/30">
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -29,8 +178,11 @@ export default function AdminContent() {
             <Link href="/admin/content" className="text-sm font-medium text-foreground hover:text-foreground transition-colors">
               Content
             </Link>
-            <Link href="/admin/reports" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Reports
+            <Link href="/admin/seo" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              SEO
+            </Link>
+            <Link href="/admin/homepage" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              Homepage
             </Link>
             <Link href="/admin/notifications" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               <Bell className="h-4 w-4" />
@@ -44,132 +196,88 @@ export default function AdminContent() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="p-6">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground font-heading">Content Management</h1>
           <p className="text-muted-foreground mt-2">
-            Manage blog posts, FAQs, testimonials, and activity logs
+            Edit website copy, headlines, and CTAs without touching code
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="hover:border-primary transition-colors cursor-pointer" onClick={() => window.location.href = '/admin/blog'}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-3">
-                  <BookOpen className="h-6 w-6 text-primary" />
-                  Blog Management
-                </CardTitle>
-              </div>
-              <CardDescription>
-                Create, edit, and publish blog posts for the website
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Published Posts</span>
-                  <span className="font-semibold">24</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Draft Posts</span>
-                  <span className="font-semibold">5</span>
-                </div>
-              </div>
-              <Button variant="outline" className="w-full mt-4" asChild>
-                <Link href="/admin/blog">Manage Blog</Link>
-              </Button>
-            </CardContent>
-          </Card>
+        <Tabs defaultValue="homepage" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-5">
+            {contentSections.map(page => (
+              <TabsTrigger key={page.page} value={page.page}>
+                {page.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-          <Card className="hover:border-primary transition-colors cursor-pointer" onClick={() => window.location.href = '/admin/faqs'}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-3">
-                  <HelpCircle className="h-6 w-6 text-primary" />
-                  FAQ Management
-                </CardTitle>
-              </div>
-              <CardDescription>
-                Add, edit, and organize frequently asked questions
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Total FAQs</span>
-                  <span className="font-semibold">52</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Categories</span>
-                  <span className="font-semibold">6</span>
-                </div>
-              </div>
-              <Button variant="outline" className="w-full mt-4" asChild>
-                <Link href="/admin/faqs">Manage FAQs</Link>
-              </Button>
-            </CardContent>
-          </Card>
+          {contentSections.map(pageConfig => (
+            <TabsContent key={pageConfig.page} value={pageConfig.page} className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Type className="h-5 w-5" />
+                        {pageConfig.label} Content
+                      </CardTitle>
+                      <CardDescription>Edit copy and text for this page</CardDescription>
+                    </div>
+                    <Button onClick={() => handleSave(pageConfig.page)} disabled={saving}>
+                      <Save className="mr-2 h-4 w-4" />
+                      {saving ? "Saving..." : "Save Changes"}
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {pageConfig.sections.map(section => (
+                    <div key={section.key} className="space-y-2">
+                      <Label htmlFor={section.key}>{section.label}</Label>
+                      {section.type === "textarea" ? (
+                        <Textarea
+                          id={section.key}
+                          value={sections[section.key]?.content_value || ""}
+                          onChange={(e) => updateField(section.key, e.target.value)}
+                          placeholder={`Enter ${section.label.toLowerCase()}`}
+                          rows={4}
+                        />
+                      ) : (
+                        <Input
+                          id={section.key}
+                          value={sections[section.key]?.content_value || ""}
+                          onChange={(e) => updateField(section.key, e.target.value)}
+                          placeholder={`Enter ${section.label.toLowerCase()}`}
+                        />
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        Current length: {(sections[section.key]?.content_value || "").length} characters
+                      </p>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          ))}
+        </Tabs>
 
-          <Card className="hover:border-primary transition-colors cursor-pointer" onClick={() => window.location.href = '/admin/testimonials'}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-3">
-                  <Star className="h-6 w-6 text-primary" />
-                  Testimonials
-                </CardTitle>
-              </div>
-              <CardDescription>
-                Manage client testimonials and success stories
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Published</span>
-                  <span className="font-semibold">12</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Pending Approval</span>
-                  <span className="font-semibold">3</span>
-                </div>
-              </div>
-              <Button variant="outline" className="w-full mt-4" asChild>
-                <Link href="/admin/testimonials">Manage Testimonials</Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:border-primary transition-colors cursor-pointer" onClick={() => window.location.href = '/admin/logs'}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-3">
-                  <Activity className="h-6 w-6 text-primary" />
-                  Activity Logs
-                </CardTitle>
-              </div>
-              <CardDescription>
-                View admin actions and system activity history
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Today's Actions</span>
-                  <span className="font-semibold">18</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">This Week</span>
-                  <span className="font-semibold">127</span>
-                </div>
-              </div>
-              <Button variant="outline" className="w-full mt-4" asChild>
-                <Link href="/admin/logs">View Logs</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <LayoutIcon className="h-5 w-5" />
+              Content Safety Guidelines
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm text-muted-foreground">
+            <p>✓ All changes are saved to the database and take effect immediately</p>
+            <p>✓ Keep headlines concise and action-oriented</p>
+            <p>✓ Descriptions should be clear and benefit-focused</p>
+            <p>✓ Test content changes on mobile devices</p>
+            <p>✓ Maintain consistent tone across all pages</p>
+            <p>⚠️ Changes cannot be undone - save carefully</p>
+          </CardContent>
+        </Card>
       </main>
     </div>
   );
