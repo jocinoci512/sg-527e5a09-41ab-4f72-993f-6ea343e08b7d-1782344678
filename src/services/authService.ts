@@ -1,12 +1,10 @@
-import { createClient } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 
 export const authService = {
   /**
    * Sign in with email and password
    */
   async signIn(email: string, password: string) {
-    const supabase = createClient();
-    
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -20,8 +18,6 @@ export const authService = {
    * Sign up with email and password
    */
   async signUp(email: string, password: string, metadata?: any) {
-    const supabase = createClient();
-    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -38,8 +34,6 @@ export const authService = {
    * Sign out
    */
   async signOut() {
-    const supabase = createClient();
-    
     const { error } = await supabase.auth.signOut();
 
     if (error) throw error;
@@ -49,8 +43,6 @@ export const authService = {
    * Get current user
    */
   async getCurrentUser() {
-    const supabase = createClient();
-    
     const { data: { user }, error } = await supabase.auth.getUser();
 
     if (error) throw error;
@@ -61,8 +53,6 @@ export const authService = {
    * Get current session
    */
   async getSession() {
-    const supabase = createClient();
-    
     const { data: { session }, error } = await supabase.auth.getSession();
 
     if (error) throw error;
@@ -81,8 +71,6 @@ export const authService = {
    * Subscribe to auth state changes
    */
   onAuthStateChange(callback: (event: string, session: any) => void) {
-    const supabase = createClient();
-    
     const { data: { subscription } } = supabase.auth.onAuthStateChange(callback);
 
     return () => {
@@ -94,8 +82,6 @@ export const authService = {
    * Reset password
    */
   async resetPassword(email: string) {
-    const supabase = createClient();
-    
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/admin/reset-password`,
     });
@@ -107,8 +93,6 @@ export const authService = {
    * Update password
    */
   async updatePassword(newPassword: string) {
-    const supabase = createClient();
-    
     const { error } = await supabase.auth.updateUser({
       password: newPassword,
     });

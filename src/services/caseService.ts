@@ -1,4 +1,4 @@
-import { createClient } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/database.types";
 
 type CaseReview = Database["public"]["Tables"]["case_reviews"]["Insert"];
@@ -9,8 +9,6 @@ export const caseService = {
    * Submit a new case review
    */
   async submitCaseReview(data: Omit<CaseReview, "id" | "created_at" | "updated_at">) {
-    const supabase = createClient();
-    
     const { data: caseReview, error } = await supabase
       .from("case_reviews")
       .insert([data])
@@ -25,8 +23,6 @@ export const caseService = {
    * Get all case reviews with optional filtering
    */
   async getCaseReviews(filters?: { status?: string; search?: string }) {
-    const supabase = createClient();
-    
     let query = supabase
       .from("case_reviews")
       .select("*")
@@ -50,8 +46,6 @@ export const caseService = {
    * Get a single case review by ID
    */
   async getCaseReview(id: string) {
-    const supabase = createClient();
-    
     const { data, error } = await supabase
       .from("case_reviews")
       .select("*")
@@ -66,8 +60,6 @@ export const caseService = {
    * Update case review status
    */
   async updateCaseStatus(id: string, status: string, adminNotes?: string) {
-    const supabase = createClient();
-    
     const updateData: Partial<CaseReviewRow> = { status: status as any };
     if (adminNotes !== undefined) {
       updateData.admin_notes = adminNotes;
@@ -88,8 +80,6 @@ export const caseService = {
    * Get case review statistics
    */
   async getCaseStats() {
-    const supabase = createClient();
-    
     const { data: cases, error } = await supabase
       .from("case_reviews")
       .select("status, created_at");
@@ -115,8 +105,6 @@ export const caseService = {
    * Subscribe to real-time case review changes
    */
   subscribeToNewCases(callback: (payload: any) => void) {
-    const supabase = createClient();
-    
     const channel = supabase
       .channel("case_reviews_changes")
       .on(

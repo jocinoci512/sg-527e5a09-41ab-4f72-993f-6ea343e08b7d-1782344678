@@ -1,4 +1,4 @@
-import { createClient } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/database.types";
 
 type ContactLead = Database["public"]["Tables"]["contact_leads"]["Insert"];
@@ -8,8 +8,6 @@ export const leadService = {
    * Submit a new contact lead
    */
   async submitContactLead(data: Omit<ContactLead, "id" | "created_at">) {
-    const supabase = createClient();
-    
     const { data: lead, error } = await supabase
       .from("contact_leads")
       .insert([data])
@@ -24,8 +22,6 @@ export const leadService = {
    * Get all contact leads with optional filtering
    */
   async getContactLeads(filters?: { status?: string; search?: string }) {
-    const supabase = createClient();
-    
     let query = supabase
       .from("contact_leads")
       .select("*")
@@ -49,8 +45,6 @@ export const leadService = {
    * Update lead status
    */
   async updateLeadStatus(id: string, status: string) {
-    const supabase = createClient();
-    
     const { data, error } = await supabase
       .from("contact_leads")
       .update({ status: status as any })
@@ -66,8 +60,6 @@ export const leadService = {
    * Get lead statistics
    */
   async getLeadStats() {
-    const supabase = createClient();
-    
     const { data: leads, error } = await supabase
       .from("contact_leads")
       .select("status, created_at");

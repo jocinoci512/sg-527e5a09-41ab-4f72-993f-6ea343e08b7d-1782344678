@@ -1,4 +1,4 @@
-import { createClient } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/database.types";
 
 type Notification = Database["public"]["Tables"]["notifications"]["Row"];
@@ -8,8 +8,6 @@ export const notificationService = {
    * Get all notifications for the current admin
    */
   async getNotifications(filters?: { type?: string; isRead?: boolean }) {
-    const supabase = createClient();
-    
     let query = supabase
       .from("notifications")
       .select("*")
@@ -33,8 +31,6 @@ export const notificationService = {
    * Mark notification as read
    */
   async markAsRead(id: string) {
-    const supabase = createClient();
-    
     const { data, error } = await supabase
       .from("notifications")
       .update({ is_read: true })
@@ -50,8 +46,6 @@ export const notificationService = {
    * Mark all notifications as read
    */
   async markAllAsRead() {
-    const supabase = createClient();
-    
     const { error } = await supabase
       .from("notifications")
       .update({ is_read: true })
@@ -64,8 +58,6 @@ export const notificationService = {
    * Get unread notification count
    */
   async getUnreadCount() {
-    const supabase = createClient();
-    
     const { count, error } = await supabase
       .from("notifications")
       .select("*", { count: "exact", head: true })
@@ -79,8 +71,6 @@ export const notificationService = {
    * Subscribe to real-time notifications
    */
   subscribeToNotifications(callback: (payload: any) => void) {
-    const supabase = createClient();
-    
     const channel = supabase
       .channel("notifications_changes")
       .on(
@@ -103,8 +93,6 @@ export const notificationService = {
    * Delete notification
    */
   async deleteNotification(id: string) {
-    const supabase = createClient();
-    
     const { error } = await supabase
       .from("notifications")
       .delete()
