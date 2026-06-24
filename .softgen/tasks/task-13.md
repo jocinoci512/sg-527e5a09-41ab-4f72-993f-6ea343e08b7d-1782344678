@@ -1,6 +1,6 @@
 ---
 title: Real-Time Case Monitoring with Supabase
-status: todo
+status: in_progress
 priority: high
 type: feature
 tags: [admin, realtime, supabase, notifications]
