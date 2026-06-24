@@ -87,9 +87,8 @@ export const publishingService = {
       .update({
         status: "published",
         review_status: "published",
-        published_at: new Date().toISOString(),
-        validation_errors: null
-      })
+        published_at: new Date().toISOString()
+      } as any)
       .eq("id", postId)
       .select()
       .single();
@@ -190,9 +189,8 @@ export const publishingService = {
       .from("blog_posts")
       .update({
         review_status: "scheduled",
-        scheduled_publish_at: publishDate.toISOString(),
-        validation_errors: null
-      })
+        scheduled_publish_at: publishDate.toISOString()
+      } as any)
       .eq("id", postId)
       .select()
       .single();
@@ -257,7 +255,7 @@ export const publishingService = {
       .from("blog_posts")
       .update({
         validation_errors: validation.errors
-      })
+      } as any)
       .eq("id", postId);
 
     return validation;
