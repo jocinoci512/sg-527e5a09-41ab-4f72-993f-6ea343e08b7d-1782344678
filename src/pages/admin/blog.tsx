@@ -1,51 +1,142 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Trash2, Eye, Bell } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Bell, Plus, Edit, Trash2, Eye, Save, X } from "lucide-react";
+import { blogService } from "@/services/blogService";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminBlog() {
-  const [showEditor, setShowEditor] = useState(false);
+  const [posts, setPosts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingPost, setEditingPost] = useState<any>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const { toast } = useToast();
 
-  // Mock data - will be replaced with Supabase queries
-  const posts = [
-    {
-      id: "POST-001",
-      title: "How to Identify Pig Butchering Scams",
-      slug: "identify-pig-butchering-scams",
-      category: "Scam Alerts",
-      status: "published",
-      author: "Admin",
-      date: "2026-06-20",
-      views: 1243
-    },
-    {
-      id: "POST-002",
-      title: "Blockchain Tracing Methods Explained",
-      slug: "blockchain-tracing-methods",
-      category: "Blockchain Intelligence",
-      status: "published",
-      author: "Admin",
-      date: "2026-06-18",
-      views: 892
-    },
-    {
-      id: "POST-003",
-      title: "Crypto Recovery Case Study",
-      slug: "crypto-recovery-case-study",
-      category: "Crypto Recovery",
-      status: "draft",
-      author: "Admin",
-      date: "2026-06-15",
-      views: 0
+  useEffect(() => {
+    loadData();
+  }, [statusFilter]);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [postsData, categoriesData] = await Promise.all([
+        blogService.getPosts({ status: statusFilter }),
+        blogService.getCategories()
+      ]);
+      setPosts(postsData);
+      setCategories(categoriesData);
+    } catch (error) {
+      console.error("Error loading blog data:", error);
+      toast({
+        title: "Error Loading Data",
+        description: "Could not load blog posts and categories",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const handleCreateNew = () => {
+    setEditingPost({
+      title: "",
+      slug: "",
+      excerpt: "",
+      content: "",
+      featured_image: "",
+      category_id: categories[0]?.id || "",
+      author_id: "550e8400-e29b-41d4-a716-446655440000", // Default author
+      status: "draft",
+      meta_title: "",
+      meta_description: "",
+      tags: []
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleEdit = (post: any) => {
+    setEditingPost(post);
+    setIsDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    try {
+      // Generate slug from title if empty
+      if (!editingPost.slug) {
+        editingPost.slug = editingPost.title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "");
+      }
+
+      if (editingPost.id) {
+        await blogService.updatePost(editingPost.id, editingPost);
+        toast({ title: "Post Updated", description: "Blog post has been updated successfully" });
+      } else {
+        await blogService.createPost(editingPost);
+        toast({ title: "Post Created", description: "New blog post has been created successfully" });
+      }
+      
+      setIsDialogOpen(false);
+      setEditingPost(null);
+      loadData();
+    } catch (error) {
+      console.error("Error saving post:", error);
+      toast({
+        title: "Save Failed",
+        description: "Could not save blog post",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDelete = async (postId: string) => {
+    if (!confirm("Are you sure you want to delete this blog post?")) return;
+    
+    try {
+      await blogService.deletePost(postId);
+      toast({ title: "Post Deleted", description: "Blog post has been deleted successfully" });
+      loadData();
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      toast({
+        title: "Delete Failed",
+        description: "Could not delete blog post",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handlePublish = async (post: any) => {
+    try {
+      await blogService.updatePost(post.id, {
+        status: post.status === "published" ? "draft" : "published",
+        published_at: post.status === "draft" ? new Date().toISOString() : null
+      });
+      toast({
+        title: post.status === "draft" ? "Post Published" : "Post Unpublished",
+        description: `Blog post is now ${post.status === "draft" ? "live" : "hidden"}`
+      });
+      loadData();
+    } catch (error) {
+      console.error("Error updating post status:", error);
+      toast({
+        title: "Update Failed",
+        description: "Could not update post status",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -71,8 +162,11 @@ export default function AdminBlog() {
             <Link href="/admin/content" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               Content
             </Link>
-            <Link href="/admin/reports" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Reports
+            <Link href="/admin/seo" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              SEO
+            </Link>
+            <Link href="/admin/homepage" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              Homepage
             </Link>
             <Link href="/admin/notifications" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               <Bell className="h-4 w-4" />
@@ -86,176 +180,225 @@ export default function AdminBlog() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="p-6">
-        {!showEditor ? (
-          <>
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h1 className="text-3xl font-bold text-foreground font-heading">Blog Management</h1>
-                <p className="text-muted-foreground mt-2">
-                  Create and manage blog posts for the website
-                </p>
-              </div>
-              <Button onClick={() => setShowEditor(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                New Post
-              </Button>
-            </div>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground font-heading">Blog Management</h1>
+            <p className="text-muted-foreground mt-2">Create, edit, and publish blog posts</p>
+          </div>
+          <Button onClick={handleCreateNew}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create New Post
+          </Button>
+        </div>
 
+        {/* Filter */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-lg">Filter Posts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full md:w-[200px]">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Posts</SelectItem>
+                <SelectItem value="published">Published</SelectItem>
+                <SelectItem value="draft">Drafts</SelectItem>
+              </SelectContent>
+            </Select>
+          </CardContent>
+        </Card>
+
+        {/* Posts List */}
+        <div className="grid grid-cols-1 gap-6">
+          {loading ? (
+            <div className="text-center py-12 text-muted-foreground">Loading posts...</div>
+          ) : posts.length === 0 ? (
             <Card>
-              <CardHeader>
-                <CardTitle>All Blog Posts ({posts.length})</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {posts.map((post) => (
-                    <div
-                      key={post.id}
-                      className="p-4 border-2 rounded-lg hover:border-primary transition-colors"
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <Badge variant={post.status === "published" ? "default" : "secondary"}>
-                              {post.status}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">{post.category}</span>
-                          </div>
-                          <h3 className="font-semibold text-lg mb-1">{post.title}</h3>
-                          <div className="text-sm text-muted-foreground">
-                            {new Date(post.date).toLocaleDateString()} • {post.views} views
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="sm">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <CardContent className="pt-12 pb-12 text-center text-muted-foreground">
+                No blog posts yet. Click "Create New Post" to get started.
               </CardContent>
             </Card>
-          </>
-        ) : (
-          <>
-            <div className="mb-8">
-              <Button variant="outline" onClick={() => setShowEditor(false)} className="mb-4">
-                ← Back to Posts
-              </Button>
-              <h1 className="text-3xl font-bold text-foreground font-heading">Create New Post</h1>
-            </div>
-
-            <Card>
-              <CardContent className="pt-6">
-                <form className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="title">Post Title</Label>
-                      <Input
-                        id="title"
-                        placeholder="Enter post title..."
-                      />
+          ) : (
+            posts.map((post) => (
+              <Card key={post.id} className="hover:shadow-lg transition-shadow">
+                <CardContent className="pt-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="font-semibold text-xl font-heading">{post.title}</h3>
+                        <Badge variant={post.status === "published" ? "default" : "secondary"}>
+                          {post.status}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                        {post.excerpt}
+                      </p>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span>Category: {post.category?.name || "Uncategorized"}</span>
+                        <span>•</span>
+                        <span>Views: {post.views || 0}</span>
+                        <span>•</span>
+                        <span>
+                          {post.published_at
+                            ? new Date(post.published_at).toLocaleDateString()
+                            : "Not published"}
+                        </span>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="slug">URL Slug</Label>
-                      <Input
-                        id="slug"
-                        placeholder="post-url-slug"
-                      />
+                    <div className="flex gap-2 ml-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePublish(post)}
+                      >
+                        {post.status === "published" ? "Unpublish" : "Publish"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(post)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(post.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="category">Category</Label>
-                      <Select>
-                        <SelectTrigger id="category">
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="crypto-recovery">Crypto Recovery</SelectItem>
-                          <SelectItem value="fraud-prevention">Fraud Prevention</SelectItem>
-                          <SelectItem value="scam-alerts">Scam Alerts</SelectItem>
-                          <SelectItem value="blockchain-intelligence">Blockchain Intelligence</SelectItem>
-                          <SelectItem value="cybersecurity">Cybersecurity</SelectItem>
-                          <SelectItem value="consumer-protection">Consumer Protection</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="status">Status</Label>
-                      <Select>
-                        <SelectTrigger id="status">
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="draft">Draft</SelectItem>
-                          <SelectItem value="published">Published</SelectItem>
-                          <SelectItem value="scheduled">Scheduled</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="publish-date">Publish Date</Label>
-                      <Input
-                        id="publish-date"
-                        type="date"
-                      />
-                    </div>
+        {/* Edit Dialog */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {editingPost?.id ? "Edit Blog Post" : "Create New Blog Post"}
+              </DialogTitle>
+              <DialogDescription>
+                Fill in the blog post details below
+              </DialogDescription>
+            </DialogHeader>
+
+            {editingPost && (
+              <div className="space-y-4 mt-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2 col-span-2">
+                    <Label htmlFor="title">Title *</Label>
+                    <Input
+                      id="title"
+                      value={editingPost.title}
+                      onChange={(e) => setEditingPost({ ...editingPost, title: e.target.value })}
+                      placeholder="Enter post title"
+                    />
                   </div>
 
                   <div className="space-y-2">
+                    <Label htmlFor="slug">Slug</Label>
+                    <Input
+                      id="slug"
+                      value={editingPost.slug}
+                      onChange={(e) => setEditingPost({ ...editingPost, slug: e.target.value })}
+                      placeholder="auto-generated-from-title"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Category *</Label>
+                    <Select
+                      value={editingPost.category_id}
+                      onValueChange={(value) => setEditingPost({ ...editingPost, category_id: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.id}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2 col-span-2">
                     <Label htmlFor="excerpt">Excerpt</Label>
                     <Textarea
                       id="excerpt"
-                      placeholder="Brief summary of the post..."
-                      rows={3}
+                      value={editingPost.excerpt}
+                      onChange={(e) => setEditingPost({ ...editingPost, excerpt: e.target.value })}
+                      placeholder="Brief description for listing pages"
+                      rows={2}
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="content">Content</Label>
+                  <div className="space-y-2 col-span-2">
+                    <Label htmlFor="content">Content *</Label>
                     <Textarea
                       id="content"
-                      placeholder="Write your post content here (supports Markdown)..."
-                      rows={15}
-                      className="font-mono text-sm"
+                      value={editingPost.content}
+                      onChange={(e) => setEditingPost({ ...editingPost, content: e.target.value })}
+                      placeholder="Write your blog post content here..."
+                      rows={12}
+                    />
+                  </div>
+
+                  <div className="space-y-2 col-span-2">
+                    <Label htmlFor="featured_image">Featured Image URL</Label>
+                    <Input
+                      id="featured_image"
+                      value={editingPost.featured_image}
+                      onChange={(e) => setEditingPost({ ...editingPost, featured_image: e.target.value })}
+                      placeholder="https://example.com/image.jpg"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="tags">Tags (comma-separated)</Label>
+                    <Label htmlFor="meta_title">SEO Title</Label>
                     <Input
-                      id="tags"
-                      placeholder="crypto, scam, recovery, blockchain"
+                      id="meta_title"
+                      value={editingPost.meta_title}
+                      onChange={(e) => setEditingPost({ ...editingPost, meta_title: e.target.value })}
+                      placeholder="SEO optimized title"
                     />
                   </div>
 
-                  <div className="flex gap-4 pt-4">
-                    <Button type="submit">
-                      Publish Post
-                    </Button>
-                    <Button type="button" variant="outline">
-                      Save as Draft
-                    </Button>
-                    <Button type="button" variant="ghost" onClick={() => setShowEditor(false)}>
-                      Cancel
-                    </Button>
+                  <div className="space-y-2">
+                    <Label htmlFor="meta_description">SEO Description</Label>
+                    <Input
+                      id="meta_description"
+                      value={editingPost.meta_description}
+                      onChange={(e) => setEditingPost({ ...editingPost, meta_description: e.target.value })}
+                      placeholder="SEO meta description"
+                    />
                   </div>
-                </form>
-              </CardContent>
-            </Card>
-          </>
-        )}
+                </div>
+
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    <X className="mr-2 h-4 w-4" />
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSave}>
+                    <Save className="mr-2 h-4 w-4" />
+                    {editingPost.id ? "Update Post" : "Create Post"}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );

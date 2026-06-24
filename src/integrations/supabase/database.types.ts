@@ -855,6 +855,7 @@ export type Database = {
     }
     Functions: {
       generate_case_reference_id: { Args: never; Returns: string }
+      increment_post_views: { Args: { post_id: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
