@@ -1,6 +1,6 @@
 ---
 title: Global Site-Wide Search Modal
-status: in_progress
+status: done
 priority: high
 type: feature
 tags: [search, navigation, ux]

@@ -1,6 +1,6 @@
 ---
 title: Dark Mode Theme Toggle
-status: in_progress
+status: done
 priority: high
 type: feature
 tags: [theme, accessibility, ui]
