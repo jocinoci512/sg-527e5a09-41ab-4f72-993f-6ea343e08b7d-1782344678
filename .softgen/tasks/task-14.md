@@ -1,6 +1,6 @@
 ---
 title: Supabase Integration & Database Schema
-status: todo
+status: in_progress
 priority: urgent
 type: chore
 tags: [supabase, database, backend]
