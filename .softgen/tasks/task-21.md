@@ -1,11 +1,11 @@
 ---
 title: Blog CMS & Reusable Template System
-status: todo
+status: in_progress
 priority: high
 type: feature
-tags: [blog, cms, admin, content]
+tags: [blog, cms, admin, seo]
 created_by: agent
-created_at: 2026-06-24T03:55:40Z
+created_at: 2026-06-24T04:10:00Z
 position: 21
 ---
 

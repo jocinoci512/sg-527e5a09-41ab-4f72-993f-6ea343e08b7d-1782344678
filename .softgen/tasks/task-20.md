@@ -1,11 +1,11 @@
 ---
 title: SEO Management System & Dynamic Sitemap
-status: todo
+status: in_progress
 priority: high
 type: feature
-tags: [seo, sitemap, cms, admin]
+tags: [seo, sitemap, meta-tags, admin]
 created_by: agent
-created_at: 2026-06-24T03:55:40Z
+created_at: 2026-06-24T04:10:00Z
 position: 20
 ---
 

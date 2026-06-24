@@ -1,11 +1,11 @@
 ---
 title: Content Management System - Full Website Editing
-status: todo
+status: in_progress
 priority: medium
 type: feature
-tags: [cms, admin, content]
+tags: [cms, admin, content-management]
 created_by: agent
-created_at: 2026-06-24T03:55:40Z
+created_at: 2026-06-24T04:10:00Z
 position: 22
 ---
 
