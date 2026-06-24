@@ -21,68 +21,61 @@ interface NotificationPopupProps {
 
 export function NotificationPopup({ notification, onClose, soundEnabled = true }: NotificationPopupProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const [soundOn, setSoundOn] = useState(soundEnabled);
 
   useEffect(() => {
     if (notification) {
       setIsVisible(true);
       
-      // Play sound alert if enabled
-      if (soundEnabled) {
-        try {
-          const audio = new Audio("/notification.mp3");
-          audio.volume = 0.5;
-          audio.play().catch(() => {
-            // Silently fail if autoplay is blocked
-          });
-        } catch (error) {
-          // Ignore audio errors
-        }
+      if (soundOn) {
+        const audio = new Audio("data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE=");
+        audio.play().catch(() => {});
       }
-
-      // Auto-dismiss after 10 seconds
+      
       const timer = setTimeout(() => {
-        handleClose();
-      }, 10000);
-
+        setIsVisible(false);
+        setTimeout(() => onClose?.(), 300);
+      }, 8000);
+      
       return () => clearTimeout(timer);
     }
-  }, [notification, soundEnabled]);
+  }, [notification, soundOn, onClose]);
 
-  const handleClose = () => {
-    setIsVisible(false);
-    setTimeout(() => {
-      onClose();
-    }, 300);
-  };
-
-  if (!notification) return null;
+  if (!notification || !isVisible) return null;
 
   return (
-    <div
-      className={cn(
-        "fixed top-20 right-6 z-[100] w-96 transition-all duration-300 ease-in-out",
-        isVisible ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
-      )}
-    >
-      <Card className="border-primary shadow-lg">
-        <CardHeader className="pb-3">
+    <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-5">
+      <Card className="w-96 border-primary shadow-lg">
+        <CardHeader className="relative pb-3">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-full bg-primary/10">
-                <Bell className="h-4 w-4 text-primary animate-pulse" />
-              </div>
+              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
               <CardTitle className="text-base">New Case Submission</CardTitle>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClose}
-              className="h-6 w-6 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => setSoundOn(!soundOn)}
+              >
+                {soundOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => {
+                  setIsVisible(false);
+                  setTimeout(() => onClose?.(), 300);
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </CardHeader>
+
         <CardContent className="space-y-4">
           <div className="space-y-2 text-sm">
             <div>
@@ -95,7 +88,7 @@ export function NotificationPopup({ notification, onClose, soundEnabled = true }
               <span className="font-medium">Scam Type:</span> {notification.scamType}
             </div>
             <div className="text-xs text-muted-foreground">
-              {new Date(notification.timestamp).toLocaleString()}
+              {new Date(notification.createdAt).toLocaleString()}
             </div>
           </div>
 
