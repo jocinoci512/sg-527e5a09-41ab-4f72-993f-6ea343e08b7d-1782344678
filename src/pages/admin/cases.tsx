@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -9,82 +9,41 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Search, Filter, FileText, Eye, Bell } from "lucide-react";
 import { format } from "date-fns";
+import { caseService } from "@/services/caseService";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminCases() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [cases, setCases] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  // Mock data - will be replaced with Supabase queries
-  const cases = [
-    {
-      id: "CASE-2024-156",
-      name: "John Doe",
-      email: "john.doe@example.com",
-      phone: "+1 555-0123",
-      country: "United States",
-      scamType: "Pig Butchering Scam",
-      amountLost: "$45,000",
-      cryptocurrency: "USDT",
-      status: "active",
-      date: "2026-06-22T14:30:00Z"
-    },
-    {
-      id: "CASE-2024-155",
-      name: "Jane Smith",
-      email: "jane.smith@example.com",
-      phone: "+1 555-0124",
-      country: "Canada",
-      scamType: "Crypto Exchange Fraud",
-      amountLost: "$23,500",
-      cryptocurrency: "Bitcoin",
-      status: "pending",
-      date: "2026-06-21T10:15:00Z"
-    },
-    {
-      id: "CASE-2024-154",
-      name: "Michael Johnson",
-      email: "m.johnson@example.com",
-      phone: "+44 7700 900123",
-      country: "United Kingdom",
-      scamType: "Romance Scam",
-      amountLost: "$67,000",
-      cryptocurrency: "Ethereum",
-      status: "active",
-      date: "2026-06-20T16:45:00Z"
-    },
-    {
-      id: "CASE-2024-153",
-      name: "Sarah Williams",
-      email: "sarah.w@example.com",
-      phone: "+61 412 345 678",
-      country: "Australia",
-      scamType: "Investment Scam",
-      amountLost: "$89,000",
-      cryptocurrency: "Bitcoin",
-      status: "closed",
-      date: "2026-06-19T09:20:00Z"
-    },
-    {
-      id: "CASE-2024-152",
-      name: "David Brown",
-      email: "david.b@example.com",
-      phone: "+1 555-0125",
-      country: "United States",
-      scamType: "NFT Scam",
-      amountLost: "$12,300",
-      cryptocurrency: "Ethereum",
-      status: "pending",
-      date: "2026-06-18T13:00:00Z"
+  useEffect(() => {
+    loadCases();
+  }, [statusFilter, searchQuery]);
+
+  const loadCases = async () => {
+    try {
+      setLoading(true);
+      const data = await caseService.getCaseReviews({
+        status: statusFilter,
+        search: searchQuery
+      });
+      setCases(data);
+    } catch (error) {
+      console.error("Error loading cases:", error);
+      toast({
+        title: "Error Loading Cases",
+        description: "Could not load case data from database.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const filteredCases = cases.filter(c => {
-    const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          c.id.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || c.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const filteredCases = cases;
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -146,7 +105,7 @@ export default function AdminCases() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Search by name, email, or case ID..."
+                  placeholder="Search by name, email, or country..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9"
@@ -179,71 +138,79 @@ export default function AdminCases() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {filteredCases.map((caseItem) => (
-                <div
-                  key={caseItem.id}
-                  className="p-4 border-2 rounded-lg hover:border-primary transition-colors"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="font-mono text-sm text-primary font-bold">
-                          {caseItem.id}
-                        </span>
-                        <Badge variant={
-                          caseItem.status === "active" ? "default" :
-                          caseItem.status === "pending" ? "secondary" : "outline"
-                        }>
-                          {caseItem.status.toUpperCase()}
-                        </Badge>
+            {loading ? (
+              <div className="text-center py-12 text-muted-foreground">
+                Loading cases...
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredCases.map((caseItem) => (
+                  <div
+                    key={caseItem.id}
+                    className="p-4 border-2 rounded-lg hover:border-primary transition-colors"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="font-mono text-sm text-primary font-bold">
+                            {caseItem.id.slice(0, 8).toUpperCase()}
+                          </span>
+                          <Badge variant={
+                            caseItem.status === "active" ? "default" :
+                            caseItem.status === "pending" ? "secondary" : "outline"
+                          }>
+                            {caseItem.status.toUpperCase()}
+                          </Badge>
+                        </div>
+                        <h3 className="font-semibold text-lg">{caseItem.full_name}</h3>
                       </div>
-                      <h3 className="font-semibold text-lg">{caseItem.name}</h3>
+                      <Button variant="outline" size="sm">
+                        View Details
+                      </Button>
                     </div>
-                    <Button variant="outline" size="sm">
-                      View Details
-                    </Button>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <div className="text-muted-foreground">Contact</div>
+                        <div className="font-medium">{caseItem.email}</div>
+                        <div className="text-muted-foreground">{caseItem.phone}</div>
+                      </div>
+                      <div>
+                        <div className="text-muted-foreground">Location</div>
+                        <div className="font-medium">{caseItem.country}</div>
+                      </div>
+                      <div>
+                        <div className="text-muted-foreground">Scam Type</div>
+                        <div className="font-medium">{caseItem.scam_type}</div>
+                      </div>
+                      <div>
+                        <div className="text-muted-foreground">Amount / Crypto</div>
+                        <div className="font-medium">{caseItem.amount_lost}</div>
+                        <div className="text-muted-foreground">{caseItem.cryptocurrency_used || "N/A"}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-3 pt-3 border-t text-sm text-muted-foreground">
+                      Submitted: {new Date(caseItem.created_at).toLocaleString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </div>
                   </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                    <div>
-                      <div className="text-muted-foreground">Contact</div>
-                      <div className="font-medium">{caseItem.email}</div>
-                      <div className="text-muted-foreground">{caseItem.phone}</div>
-                    </div>
-                    <div>
-                      <div className="text-muted-foreground">Location</div>
-                      <div className="font-medium">{caseItem.country}</div>
-                    </div>
-                    <div>
-                      <div className="text-muted-foreground">Scam Type</div>
-                      <div className="font-medium">{caseItem.scamType}</div>
-                    </div>
-                    <div>
-                      <div className="text-muted-foreground">Amount / Crypto</div>
-                      <div className="font-medium">{caseItem.amountLost}</div>
-                      <div className="text-muted-foreground">{caseItem.cryptocurrency}</div>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-3 pt-3 border-t text-sm text-muted-foreground">
-                    Submitted: {new Date(caseItem.date).toLocaleString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </div>
-                </div>
-              ))}
+                ))}
 
-              {filteredCases.length === 0 && (
-                <div className="text-center py-12 text-muted-foreground">
-                  No cases found matching your search criteria.
-                </div>
-              )}
-            </div>
+                {filteredCases.length === 0 && !loading && (
+                  <div className="text-center py-12 text-muted-foreground">
+                    {searchQuery || statusFilter !== "all" 
+                      ? "No cases found matching your search criteria."
+                      : "No cases submitted yet. New case submissions will appear here automatically."}
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       </main>

@@ -17,80 +17,102 @@ import {
 } from "lucide-react";
 import { LiveCounter } from "@/components/admin/LiveCounter";
 import { NotificationPopup } from "@/components/admin/NotificationPopup";
+import { caseService } from "@/services/caseService";
+import { leadService } from "@/services/leadService";
+import { notificationService } from "@/services/notificationService";
 
 export default function AdminDashboard() {
   const [newNotification, setNewNotification] = useState<any>(null);
-  const [unreadCount, setUnreadCount] = useState(2);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [stats, setStats] = useState({
+    totalCases: 0,
+    pendingCases: 0,
+    activeCases: 0,
+    closedCases: 0,
+    newCasesToday: 0,
+    totalLeads: 0,
+    newLeads: 0
+  });
+  const [recentCases, setRecentCases] = useState<any[]>([]);
+  const [recentLeads, setRecentLeads] = useState<any[]>([]);
 
-  // Mock data - will be replaced with Supabase real-time subscriptions
-  const stats = {
-    totalCases: 142,
-    pendingCases: 23,
-    activeCases: 45,
-    closedCases: 74,
-    newCasesToday: 5,
-    totalLeads: 89,
-    newLeads: 12
+  // Load initial data
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  // Set up real-time subscriptions
+  useEffect(() => {
+    // Subscribe to new case submissions
+    const unsubscribeCases = caseService.subscribeToNewCases((payload) => {
+      console.log("New case submitted:", payload);
+      
+      // Show notification popup
+      setNewNotification({
+        id: payload.new.id,
+        fullName: payload.new.full_name,
+        country: payload.new.country,
+        scamType: payload.new.scam_type,
+        createdAt: payload.new.created_at
+      });
+      
+      // Reload dashboard data
+      loadDashboardData();
+    });
+
+    // Subscribe to notifications
+    const unsubscribeNotifications = notificationService.subscribeToNotifications((payload) => {
+      console.log("New notification:", payload);
+      loadUnreadCount();
+    });
+
+    return () => {
+      unsubscribeCases();
+      unsubscribeNotifications();
+    };
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      // Load case statistics
+      const caseStats = await caseService.getCaseStats();
+      
+      // Load lead statistics
+      const leadStats = await leadService.getLeadStats();
+      
+      // Load recent cases
+      const cases = await caseService.getCaseReviews();
+      setRecentCases(cases.slice(0, 3));
+      
+      // Load recent leads
+      const leads = await leadService.getContactLeads();
+      setRecentLeads(leads.slice(0, 3));
+      
+      setStats({
+        totalCases: caseStats.total,
+        pendingCases: caseStats.pending,
+        activeCases: caseStats.active,
+        closedCases: caseStats.closed,
+        newCasesToday: caseStats.today,
+        totalLeads: leadStats.total,
+        newLeads: leadStats.new
+      });
+    } catch (error) {
+      console.error("Error loading dashboard data:", error);
+    }
   };
 
-  const recentCases = [
-    {
-      id: "CASE-2024-156",
-      name: "John Doe",
-      type: "Pig Butchering Scam",
-      amount: "$45,000",
-      status: "active",
-      date: "2026-06-22"
-    },
-    {
-      id: "CASE-2024-155",
-      name: "Jane Smith",
-      type: "Crypto Exchange Fraud",
-      amount: "$23,500",
-      status: "pending",
-      date: "2026-06-21"
-    },
-    {
-      id: "CASE-2024-154",
-      name: "Michael Johnson",
-      type: "Romance Scam",
-      amount: "$67,000",
-      status: "active",
-      date: "2026-06-20"
+  const loadUnreadCount = async () => {
+    try {
+      const count = await notificationService.getUnreadCount();
+      setUnreadCount(count);
+    } catch (error) {
+      console.error("Error loading unread count:", error);
     }
-  ];
+  };
 
-  const recentLeads = [
-    {
-      id: "LEAD-1234",
-      name: "Sarah Williams",
-      email: "sarah.w@example.com",
-      type: "Case Review",
-      date: "2026-06-23"
-    },
-    {
-      id: "LEAD-1233",
-      name: "David Brown",
-      email: "david.b@example.com",
-      type: "Contact Form",
-      date: "2026-06-23"
-    }
-  ];
-
-  // Simulate real-time notification (in production, this would be Supabase subscription)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      // Uncomment to test notification popup
-      // setNewNotification({
-      //   id: "notif-1",
-      //   fullName: "Test User",
-      //   country: "United States",
-      //   scamType: "Cryptocurrency Fraud",
-      //   createdAt: new Date().toISOString()
-      // });
-    }, 5000);
-    
-    return () => clearTimeout(timer);
+    loadUnreadCount();
   }, []);
 
   return (
@@ -222,7 +244,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="text-xs text-muted-foreground flex items-center gap-1">
                   <TrendingUp className="h-3 w-3 text-green-500" />
-                  +18% conversion rate
+                  Live data from Supabase
                 </div>
               </div>
             </CardContent>
@@ -245,35 +267,41 @@ export default function AdminDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {recentCases.map((caseItem) => (
-                    <div
-                      key={caseItem.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="font-mono text-sm text-primary font-semibold">
-                            {caseItem.id}
-                          </span>
-                          <Badge variant={
-                            caseItem.status === "active" ? "default" :
-                            caseItem.status === "pending" ? "secondary" : "outline"
-                          }>
-                            {caseItem.status}
-                          </Badge>
+                {recentCases.length > 0 ? (
+                  <div className="space-y-3">
+                    {recentCases.map((caseItem) => (
+                      <div
+                        key={caseItem.id}
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="font-mono text-sm text-primary font-semibold">
+                              {caseItem.id.slice(0, 8)}
+                            </span>
+                            <Badge variant={
+                              caseItem.status === "active" ? "default" :
+                              caseItem.status === "pending" ? "secondary" : "outline"
+                            }>
+                              {caseItem.status}
+                            </Badge>
+                          </div>
+                          <div className="font-medium">{caseItem.full_name}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {caseItem.scam_type} • {caseItem.amount_lost} • {new Date(caseItem.created_at).toLocaleDateString()}
+                          </div>
                         </div>
-                        <div className="font-medium">{caseItem.name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {caseItem.type} • {caseItem.amount} • {new Date(caseItem.date).toLocaleDateString()}
-                        </div>
+                        <Button variant="outline" size="sm" asChild>
+                          <Link href="/admin/cases">View Details</Link>
+                        </Button>
                       </div>
-                      <Button variant="outline" size="sm" asChild>
-                        <Link href="/admin/cases">View Details</Link>
-                      </Button>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No cases submitted yet. New cases will appear here automatically.
+                  </div>
+                )}
                 <div className="mt-6 text-center">
                   <Button variant="outline" asChild>
                     <Link href="/admin/cases">View All Cases</Link>
@@ -292,30 +320,36 @@ export default function AdminDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {recentLeads.map((lead) => (
-                    <div
-                      key={lead.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="font-mono text-sm text-primary font-semibold">
-                            {lead.id}
-                          </span>
-                          <Badge variant="outline">{lead.type}</Badge>
+                {recentLeads.length > 0 ? (
+                  <div className="space-y-3">
+                    {recentLeads.map((lead) => (
+                      <div
+                        key={lead.id}
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="font-mono text-sm text-primary font-semibold">
+                              {lead.id.slice(0, 8)}
+                            </span>
+                            <Badge variant="outline">Contact Form</Badge>
+                          </div>
+                          <div className="font-medium">{lead.full_name}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {lead.email} • {new Date(lead.created_at).toLocaleDateString()}
+                          </div>
                         </div>
-                        <div className="font-medium">{lead.name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {lead.email} • {new Date(lead.date).toLocaleDateString()}
-                        </div>
+                        <Button variant="outline" size="sm" asChild>
+                          <Link href="/admin/leads">View Details</Link>
+                        </Button>
                       </div>
-                      <Button variant="outline" size="sm" asChild>
-                        <Link href="/admin/leads">View Details</Link>
-                      </Button>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No leads submitted yet. New leads will appear here automatically.
+                  </div>
+                )}
                 <div className="mt-6 text-center">
                   <Button variant="outline" asChild>
                     <Link href="/admin/leads">View All Leads</Link>
@@ -333,7 +367,7 @@ export default function AdminDashboard() {
               <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
               <span className="font-medium">Real-time monitoring active</span>
               <span className="text-muted-foreground">
-                • Dashboard updates automatically when new cases are submitted (Supabase connection required for full functionality)
+                • Dashboard updates automatically when new cases are submitted
               </span>
             </div>
           </CardContent>

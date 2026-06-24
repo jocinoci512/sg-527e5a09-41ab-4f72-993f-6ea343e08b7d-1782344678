@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -7,62 +7,41 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Filter, Mail, Phone, Bell } from "lucide-react";
+import { leadService } from "@/services/leadService";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminLeads() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [leads, setLeads] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  // Mock data - will be replaced with Supabase queries
-  const leads = [
-    {
-      id: "LEAD-1234",
-      name: "Sarah Williams",
-      email: "sarah.w@example.com",
-      phone: "+1 555-0126",
-      type: "Case Review",
-      message: "I need help recovering $50k stolen in a crypto scam...",
-      status: "new",
-      date: "2026-06-23T14:20:00Z"
-    },
-    {
-      id: "LEAD-1233",
-      name: "David Brown",
-      email: "david.b@example.com",
-      phone: "+1 555-0127",
-      type: "Contact Form",
-      message: "Can you help with investigating a romance scam?",
-      status: "contacted",
-      date: "2026-06-23T09:15:00Z"
-    },
-    {
-      id: "LEAD-1232",
-      name: "Emily Chen",
-      email: "emily.chen@example.com",
-      phone: "+65 9123 4567",
-      type: "Case Review",
-      message: "Lost $80k in investment fraud, need blockchain tracing...",
-      status: "new",
-      date: "2026-06-22T16:30:00Z"
-    },
-    {
-      id: "LEAD-1231",
-      name: "Robert Martinez",
-      email: "r.martinez@example.com",
-      phone: "+1 555-0128",
-      type: "Contact Form",
-      message: "General inquiry about your services...",
-      status: "qualified",
-      date: "2026-06-22T11:00:00Z"
+  useEffect(() => {
+    loadLeads();
+  }, [statusFilter, searchQuery]);
+
+  const loadLeads = async () => {
+    try {
+      setLoading(true);
+      const data = await leadService.getContactLeads({
+        status: statusFilter !== "all" ? statusFilter : undefined,
+        search: searchQuery
+      });
+      setLeads(data);
+    } catch (error) {
+      console.error("Error loading leads:", error);
+      toast({
+        title: "Error Loading Leads",
+        description: "Could not load lead data from database.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const filteredLeads = leads.filter(lead => {
-    const matchesSearch = lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          lead.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          lead.id.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = typeFilter === "all" || lead.type === typeFilter;
-    return matchesSearch && matchesType;
-  });
+  const filteredLeads = leads;
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -123,21 +102,22 @@ export default function AdminLeads() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Search by name, email, or lead ID..."
+                  placeholder="Search by name or email..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9"
                 />
               </div>
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-full md:w-[200px]">
                   <Filter className="mr-2 h-4 w-4" />
-                  <SelectValue placeholder="Filter by type" />
+                  <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="Case Review">Case Review</SelectItem>
-                  <SelectItem value="Contact Form">Contact Form</SelectItem>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="new">New</SelectItem>
+                  <SelectItem value="contacted">Contacted</SelectItem>
+                  <SelectItem value="qualified">Qualified</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -155,71 +135,81 @@ export default function AdminLeads() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {filteredLeads.map((lead) => (
-                <div
-                  key={lead.id}
-                  className="p-4 border-2 rounded-lg hover:border-primary transition-colors"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="font-mono text-sm text-primary font-bold">
-                          {lead.id}
-                        </span>
-                        <Badge variant={
-                          lead.status === "new" ? "default" :
-                          lead.status === "contacted" ? "secondary" : "outline"
-                        }>
-                          {lead.status.toUpperCase()}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">
-                          {lead.type}
-                        </Badge>
-                      </div>
-                      <h3 className="font-semibold text-lg mb-2">{lead.name}</h3>
-                      <div className="flex flex-col gap-1 text-sm text-muted-foreground mb-3">
-                        <div className="flex items-center gap-2">
-                          <Mail className="h-3 w-3" />
-                          {lead.email}
+            {loading ? (
+              <div className="text-center py-12 text-muted-foreground">
+                Loading leads...
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredLeads.map((lead) => (
+                  <div
+                    key={lead.id}
+                    className="p-4 border-2 rounded-lg hover:border-primary transition-colors"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="font-mono text-sm text-primary font-bold">
+                            {lead.id.slice(0, 8).toUpperCase()}
+                          </span>
+                          <Badge variant={
+                            lead.status === "new" ? "default" :
+                            lead.status === "contacted" ? "secondary" : "outline"
+                          }>
+                            {lead.status.toUpperCase()}
+                          </Badge>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-3 w-3" />
-                          {lead.phone}
+                        <h3 className="font-semibold text-lg mb-2">{lead.full_name}</h3>
+                        <div className="flex flex-col gap-1 text-sm text-muted-foreground mb-3">
+                          <div className="flex items-center gap-2">
+                            <Mail className="h-3 w-3" />
+                            {lead.email}
+                          </div>
+                          {lead.phone && (
+                            <div className="flex items-center gap-2">
+                              <Phone className="h-3 w-3" />
+                              {lead.phone}
+                            </div>
+                          )}
                         </div>
+                        <div className="mb-2">
+                          <div className="text-sm font-medium text-foreground">Subject: {lead.subject}</div>
+                        </div>
+                        <p className="text-sm text-muted-foreground italic line-clamp-2">
+                          "{lead.message}"
+                        </p>
                       </div>
-                      <p className="text-sm text-muted-foreground italic">
-                        "{lead.message}"
-                      </p>
+                      <div className="flex flex-col gap-2">
+                        <Button variant="outline" size="sm">
+                          View Details
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          Mark as Contacted
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex flex-col gap-2">
-                      <Button variant="outline" size="sm">
-                        View Details
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        Mark as Contacted
-                      </Button>
+                    
+                    <div className="pt-3 border-t text-sm text-muted-foreground">
+                      Submitted: {new Date(lead.created_at).toLocaleString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
                     </div>
                   </div>
-                  
-                  <div className="pt-3 border-t text-sm text-muted-foreground">
-                    Submitted: {new Date(lead.date).toLocaleString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </div>
-                </div>
-              ))}
+                ))}
 
-              {filteredLeads.length === 0 && (
-                <div className="text-center py-12 text-muted-foreground">
-                  No leads found matching your search criteria.
-                </div>
-              )}
-            </div>
+                {filteredLeads.length === 0 && !loading && (
+                  <div className="text-center py-12 text-muted-foreground">
+                    {searchQuery || statusFilter !== "all" 
+                      ? "No leads found matching your search criteria."
+                      : "No leads submitted yet. New contact submissions will appear here automatically."}
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       </main>
