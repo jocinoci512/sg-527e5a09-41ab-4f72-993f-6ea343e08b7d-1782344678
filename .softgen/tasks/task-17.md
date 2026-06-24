@@ -1,6 +1,6 @@
 ---
 title: Admin Homepage Content Management
-status: todo
+status: in_progress
 priority: medium
 type: feature
 tags: [admin, cms, homepage]
