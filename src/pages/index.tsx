@@ -6,32 +6,131 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import Link from "next/link";
 import { Shield, Search, FileText, Globe, Lock, CheckCircle, ArrowRight, AlertTriangle, Heart, TrendingUp, Coins, DollarSign, Users, Star, Quote, BarChart3, Target, Award, Clock } from "lucide-react";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
+import { useState, useEffect } from "react";
+import { homepageService } from "@/services/homepageService";
 
 export default function Home() {
+  // State for database-loaded content
+  const [globalStats, setGlobalStats] = useState<any[]>([]);
+  const [liveUpdates, setLiveUpdates] = useState<any[]>([]);
+  const [globalRegions, setGlobalRegions] = useState<any[]>([]);
+  const [fraudCategories, setFraudCategories] = useState<any[]>([]);
+  const [dashboardMetrics, setDashboardMetrics] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load dynamic content from database
+  useEffect(() => {
+    const loadHomepageContent = async () => {
+      try {
+        const [stats, updates, regions, categories, metrics] = await Promise.all([
+          homepageService.getStatistics(),
+          homepageService.getLiveUpdates(),
+          homepageService.getGlobalRegions(),
+          homepageService.getFraudCategories(),
+          homepageService.getDashboardMetrics()
+        ]);
+
+        // Map database data to component format
+        setGlobalStats(stats.map(stat => ({
+          icon: getIconByName(stat.icon_name),
+          value: stat.value,
+          label: stat.label,
+          suffix: stat.suffix,
+          prefix: stat.prefix,
+          color: stat.color
+        })));
+
+        setLiveUpdates(updates.map(update => ({
+          type: update.type,
+          message: update.message,
+          location: update.location,
+          time: update.time_ago,
+          icon: getIconByName(update.icon_name),
+          color: update.color
+        })));
+
+        setGlobalRegions(regions.map(region => ({
+          region: region.region,
+          countries: region.countries,
+          investigations: region.investigations,
+          support: region.support,
+          icon: Globe
+        })));
+
+        setFraudCategories(categories.map(cat => ({
+          category: cat.category,
+          cases: cat.cases,
+          successRate: cat.success_rate,
+          trend: cat.trend,
+          color: cat.color,
+          bgColor: cat.bg_color
+        })));
+
+        setDashboardMetrics(metrics.map(metric => ({
+          label: metric.label,
+          value: metric.value,
+          change: metric.change,
+          icon: getIconByName(metric.icon_name),
+          color: metric.color
+        })));
+      } catch (error) {
+        console.error("Error loading homepage content:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadHomepageContent();
+  }, []);
+
+  // Helper function to map icon names to components
+  const getIconByName = (iconName: string) => {
+    const iconMap: Record<string, any> = {
+      FileText,
+      Globe,
+      TrendingUp,
+      Award,
+      BarChart3,
+      Users,
+      DollarSign,
+      Target,
+      Search,
+      CheckCircle,
+      Clock
+    };
+    return iconMap[iconName] || FileText;
+  };
+
   const services = [
     {
       icon: Shield,
       title: "Cryptocurrency Fraud Investigation",
-      description: "Expert analysis of crypto scams, fake exchanges, and digital asset theft with blockchain forensics.",
-      href: "/services/crypto-fraud"
+      description: "Professional blockchain tracing and digital asset investigation services for cryptocurrency scam victims."
     },
     {
       icon: Search,
       title: "Blockchain Transaction Tracing",
-      description: "Advanced on-chain analysis to track and identify fraudulent cryptocurrency transactions.",
-      href: "/services/blockchain-tracing"
+      description: "Advanced forensic analysis of blockchain transactions to identify and track stolen digital assets."
     },
     {
       icon: FileText,
       title: "Digital Asset Recovery Consultation",
-      description: "Strategic guidance and professional support for recovering stolen or fraudulently obtained assets.",
-      href: "/services/asset-recovery"
+      description: "Expert guidance on recovery strategies, legal options, and evidence documentation."
     },
     {
       icon: Globe,
       title: "Investment Scam Investigation",
-      description: "Comprehensive investigation of fake investment platforms, Ponzi schemes, and financial fraud.",
-      href: "/services/investment-scams"
+      description: "Comprehensive investigation services for victims of fraudulent investment schemes."
+    },
+    {
+      icon: Heart,
+      title: "Romance Scam Investigation",
+      description: "Specialized investigation and evidence gathering for romance fraud cases."
+    },
+    {
+      icon: AlertTriangle,
+      title: "Scam Victim Support",
+      description: "Confidential support, professional guidance, and recovery consultation for fraud victims."
     }
   ];
 
@@ -39,336 +138,78 @@ export default function Home() {
     {
       icon: Coins,
       title: "Cryptocurrency Scams",
-      description: "Fake exchanges, pump-and-dump schemes, rug pulls, and crypto theft",
-      href: "/scams/cryptocurrency",
-      color: "text-orange-600"
+      description: "Bitcoin fraud, fake exchanges, pump and dump schemes"
     },
     {
       icon: TrendingUp,
       title: "Investment Scams",
-      description: "Ponzi schemes, fake trading platforms, and fraudulent investment opportunities",
-      href: "/scams/investment",
-      color: "text-blue-600"
+      description: "Ponzi schemes, fake trading platforms, fraudulent investment opportunities"
     },
     {
       icon: Heart,
       title: "Romance Scams",
-      description: "Online dating fraud, fake profiles, and relationship-based financial manipulation",
-      href: "/scams/romance",
-      color: "text-pink-600"
+      description: "Online dating fraud, catfishing, emotional manipulation"
     },
     {
       icon: DollarSign,
-      title: "Forex Scams",
-      description: "Fake forex brokers, signal scams, and currency trading fraud",
-      href: "/scams/forex",
-      color: "text-green-600"
-    },
-    {
-      icon: Users,
-      title: "Pig Butchering Scams",
-      description: "Long-term relationship fraud leading to fake investment platforms",
-      href: "/scams/pig-butchering",
-      color: "text-purple-600"
-    },
-    {
-      icon: AlertTriangle,
-      title: "NFT Scams",
-      description: "Fake NFT projects, phishing attacks, and digital art fraud",
-      href: "/scams/nft",
-      color: "text-indigo-600"
+      title: "Forex & Trading Scams",
+      description: "Fake forex platforms, binary options fraud, trading signal scams"
     }
   ];
 
   const processSteps = [
     {
-      step: "01",
+      step: 1,
       title: "Case Review",
-      description: "Submit your case details for a thorough initial assessment by our investigation team."
+      description: "Submit your case details through our secure intake form. Our team reviews all submissions within 24-48 hours."
     },
     {
-      step: "02",
+      step: 2,
       title: "Evidence Analysis",
-      description: "Our experts analyze all provided documentation, communications, and transaction records."
+      description: "Professional analysis of transaction records, communications, wallet addresses, and supporting documentation."
     },
     {
-      step: "03",
+      step: 3,
       title: "Blockchain Tracing",
-      description: "Advanced on-chain forensics to trace cryptocurrency movements and identify endpoints."
+      description: "Advanced forensic investigation using blockchain intelligence tools to trace digital asset movements."
     },
     {
-      step: "04",
+      step: 4,
       title: "Intelligence Gathering",
-      description: "Cross-reference findings with global fraud databases and intelligence networks."
+      description: "Comprehensive investigation into scammer networks, infrastructure, and identifying information."
     },
     {
-      step: "05",
+      step: 5,
       title: "Recovery Consultation",
-      description: "Receive a comprehensive report with actionable recommendations for recovery efforts."
+      description: "Professional guidance on legal options, law enforcement coordination, and recovery strategies."
     }
   ];
 
   const reasons = [
     {
-      icon: CheckCircle,
-      title: "Experienced Investigators",
-      description: "Certified professionals with extensive backgrounds in cybersecurity and financial crime."
-    },
-    {
-      icon: CheckCircle,
-      title: "Blockchain Intelligence",
-      description: "Cutting-edge forensic tools and methodologies for cryptocurrency tracing."
-    },
-    {
-      icon: CheckCircle,
-      title: "Global Case Support",
-      description: "We handle international fraud cases across multiple jurisdictions."
-    },
-    {
-      icon: CheckCircle,
-      title: "Confidential Handling",
-      description: "Your case information is protected with enterprise-grade security protocols."
-    }
-  ];
-
-  const successStories = [
-    {
-      title: "Cryptocurrency Investment Scam Recovery",
-      amount: "$420,000",
-      description: "Traced stolen Bitcoin through multiple exchanges and assisted law enforcement in identifying perpetrators. Client received partial recovery through legal proceedings.",
-      outcome: "Partial Recovery Achieved"
-    },
-    {
-      title: "Romance Scam Investigation",
-      amount: "$85,000",
-      description: "Comprehensive investigation uncovered international fraud network. Evidence provided to authorities led to arrests and ongoing recovery efforts.",
-      outcome: "Criminal Charges Filed"
-    },
-    {
-      title: "Forex Trading Platform Fraud",
-      amount: "$250,000",
-      description: "Blockchain forensics revealed fake trading platform's infrastructure. Investigation report used in civil litigation and regulatory complaints.",
-      outcome: "Legal Action Initiated"
-    }
-  ];
-
-  const testimonials = [
-    {
-      name: "Sarah M.",
-      location: "United States",
-      text: "Cipher Trace provided professional, thorough investigation services when I lost funds to a crypto scam. Their detailed report gave me the evidence I needed to pursue legal action.",
-      rating: 5
-    },
-    {
-      name: "David K.",
-      location: "United Kingdom",
-      text: "The team's expertise in blockchain analysis was impressive. They traced my stolen cryptocurrency and provided clear documentation for law enforcement.",
-      rating: 5
-    },
-    {
-      name: "Maria L.",
-      location: "Australia",
-      text: "Professional, compassionate, and knowledgeable. They helped me understand what happened and provided a path forward after losing money to an investment scam.",
-      rating: 5
-    }
-  ];
-
-  const faqs = [
-    {
-      question: "Can you guarantee recovery of my lost funds?",
-      answer: "No. While we provide expert investigation and recovery consultation services, we cannot guarantee recovery outcomes. Success depends on many factors including available evidence, jurisdiction, blockchain activity, and third-party cooperation. We focus on providing comprehensive investigation reports that can support legal and recovery efforts."
-    },
-    {
-      question: "How long does an investigation take?",
-      answer: "Investigation timelines vary based on case complexity. Initial case reviews typically take 3-5 business days. Comprehensive blockchain tracing and intelligence gathering can take 2-4 weeks. We provide regular updates throughout the investigation process."
-    },
-    {
-      question: "What information do I need to provide?",
-      answer: "We need transaction records, wallet addresses, communication logs with scammers, screenshots, website URLs, and any other relevant documentation. The more detailed information you provide, the more thorough our investigation can be."
-    },
-    {
-      question: "Do you work with law enforcement?",
-      answer: "Yes. We frequently provide investigation reports and evidence packages to law enforcement agencies. Our reports are formatted to meet professional standards and can support criminal investigations and legal proceedings."
-    },
-    {
-      question: "What are your fees?",
-      answer: "Our fees vary based on case complexity and required investigation scope. We provide transparent pricing after the initial case review. Contact us for a free consultation to discuss your specific situation."
-    },
-    {
-      question: "Is my information kept confidential?",
-      answer: "Absolutely. We maintain strict confidentiality protocols and use enterprise-grade security measures to protect client information. Your case details are only shared with authorized personnel and law enforcement when necessary."
-    }
-  ];
-
-  const blogPosts = [
-    {
-      title: "How to Identify Cryptocurrency Investment Scams: 10 Warning Signs",
-      category: "Fraud Prevention",
-      date: "June 15, 2026",
-      excerpt: "Learn the red flags that indicate a crypto investment opportunity might be a scam. Protect yourself from common tactics used by fraudsters.",
-      href: "/blog/identify-crypto-scams"
-    },
-    {
-      title: "Blockchain Forensics: How We Trace Stolen Cryptocurrency",
-      category: "Blockchain Intelligence",
-      date: "June 10, 2026",
-      excerpt: "A behind-the-scenes look at the tools and techniques used in professional blockchain transaction tracing and cryptocurrency investigation.",
-      href: "/blog/blockchain-forensics-explained"
-    },
-    {
-      title: "Romance Scams and Crypto: A Growing Threat",
-      category: "Scam Alerts",
-      date: "June 5, 2026",
-      excerpt: "Romance scammers increasingly use cryptocurrency to steal from victims. Learn how these scams work and how to protect yourself.",
-      href: "/blog/romance-scams-crypto"
-    }
-  ];
-
-  const globalStats = [
-    {
-      icon: FileText,
-      value: 2847,
-      label: "Cases Reviewed",
-      suffix: "+",
-      color: "text-blue-600"
-    },
-    {
-      icon: Globe,
-      value: 127,
-      label: "Countries Served",
-      suffix: "",
-      color: "text-green-600"
-    },
-    {
-      icon: TrendingUp,
-      value: 456,
-      label: "Active Investigations",
-      suffix: "+",
-      color: "text-orange-600"
-    },
-    {
       icon: Award,
-      value: 98,
-      label: "Client Satisfaction",
-      suffix: "%",
-      color: "text-purple-600"
+      title: "Experienced Investigators",
+      description: "Certified professionals with extensive experience in fraud investigation and blockchain forensics."
     },
     {
-      icon: BarChart3,
-      value: 12500,
-      label: "Blockchain Transactions Traced",
-      suffix: "+",
-      color: "text-indigo-600"
-    },
-    {
-      icon: Users,
-      value: 3200,
-      label: "Victims Assisted",
-      suffix: "+",
-      color: "text-pink-600"
-    },
-    {
-      icon: DollarSign,
-      value: 85,
-      label: "Funds Identified",
-      suffix: "M+",
-      prefix: "$",
-      color: "text-emerald-600"
-    },
-    {
-      icon: Target,
-      value: 94,
-      label: "Investigation Success Rate",
-      suffix: "%",
-      color: "text-cyan-600"
-    }
-  ];
-
-  const liveUpdates = [
-    {
-      type: "investigation",
-      message: "New cryptocurrency fraud investigation opened",
-      location: "United States",
-      time: "2 minutes ago",
-      icon: FileText,
-      color: "text-blue-600"
-    },
-    {
-      type: "tracing",
-      message: "Blockchain tracing completed for $420K case",
-      location: "United Kingdom",
-      time: "15 minutes ago",
       icon: Search,
-      color: "text-green-600"
+      title: "Blockchain Intelligence",
+      description: "Advanced tools and expertise in cryptocurrency tracing and digital asset investigation."
     },
     {
-      type: "completed",
-      message: "Investment fraud investigation completed",
-      location: "Australia",
-      time: "1 hour ago",
-      icon: CheckCircle,
-      color: "text-emerald-600"
-    },
-    {
-      type: "network",
-      message: "International scam network identified",
-      location: "Multiple Countries",
-      time: "3 hours ago",
       icon: Globe,
-      color: "text-purple-600"
+      title: "Global Case Support",
+      description: "Supporting victims worldwide with international fraud investigation expertise."
     },
     {
-      type: "consultation",
-      message: "Recovery consultation scheduled",
-      location: "Canada",
-      time: "4 hours ago",
-      icon: Clock,
-      color: "text-orange-600"
-    }
-  ];
-
-  const globalRegions = [
-    {
-      region: "North America",
-      countries: "USA, Canada, Mexico",
-      investigations: "1,240+",
-      support: "24/7 Available",
-      icon: Globe
+      icon: Lock,
+      title: "Confidential Handling",
+      description: "Secure, private case management with strict confidentiality protocols."
     },
     {
-      region: "Europe",
-      countries: "UK, Germany, France, Spain",
-      investigations: "850+",
-      support: "24/7 Available",
-      icon: Globe
-    },
-    {
-      region: "Asia-Pacific",
-      countries: "Australia, Singapore, Japan, India",
-      investigations: "620+",
-      support: "24/7 Available",
-      icon: Globe
-    },
-    {
-      region: "Latin America",
-      countries: "Brazil, Argentina, Chile",
-      investigations: "180+",
-      support: "24/7 Available",
-      icon: Globe
-    },
-    {
-      region: "Middle East",
-      countries: "UAE, Saudi Arabia, Israel",
-      investigations: "145+",
-      support: "24/7 Available",
-      icon: Globe
-    },
-    {
-      region: "Africa",
-      countries: "South Africa, Nigeria, Kenya",
-      investigations: "95+",
-      support: "24/7 Available",
-      icon: Globe
+      icon: FileText,
+      title: "Professional Reporting",
+      description: "Detailed investigation reports suitable for law enforcement and legal proceedings."
     }
   ];
 
@@ -402,102 +243,6 @@ export default function Home() {
       icon: Search,
       title: "Blockchain Intelligence Expertise",
       description: "Advanced forensic tools and investigative techniques"
-    }
-  ];
-
-  const fraudCategories = [
-    {
-      category: "Cryptocurrency Fraud",
-      cases: 847,
-      successRate: 92,
-      trend: "+15%",
-      color: "text-orange-600",
-      bgColor: "bg-orange-100 dark:bg-orange-900/20"
-    },
-    {
-      category: "Investment Fraud",
-      cases: 623,
-      successRate: 89,
-      trend: "+22%",
-      color: "text-blue-600",
-      bgColor: "bg-blue-100 dark:bg-blue-900/20"
-    },
-    {
-      category: "Romance Scams",
-      cases: 456,
-      successRate: 87,
-      trend: "+18%",
-      color: "text-pink-600",
-      bgColor: "bg-pink-100 dark:bg-pink-900/20"
-    },
-    {
-      category: "Forex Scams",
-      cases: 389,
-      successRate: 91,
-      trend: "+12%",
-      color: "text-green-600",
-      bgColor: "bg-green-100 dark:bg-green-900/20"
-    },
-    {
-      category: "NFT Scams",
-      cases: 234,
-      successRate: 85,
-      trend: "+28%",
-      color: "text-indigo-600",
-      bgColor: "bg-indigo-100 dark:bg-indigo-900/20"
-    },
-    {
-      category: "Wire Fraud",
-      cases: 298,
-      successRate: 88,
-      trend: "+9%",
-      color: "text-purple-600",
-      bgColor: "bg-purple-100 dark:bg-purple-900/20"
-    }
-  ];
-
-  const dashboardMetrics = [
-    {
-      label: "Active Cases",
-      value: 456,
-      change: "+12%",
-      icon: FileText,
-      color: "text-blue-600"
-    },
-    {
-      label: "Investigations Completed",
-      value: 2847,
-      change: "+8%",
-      icon: CheckCircle,
-      color: "text-green-600"
-    },
-    {
-      label: "Victims Assisted",
-      value: 3200,
-      change: "+15%",
-      icon: Users,
-      color: "text-purple-600"
-    },
-    {
-      label: "Countries Supported",
-      value: 127,
-      change: "+3",
-      icon: Globe,
-      color: "text-orange-600"
-    },
-    {
-      label: "Blockchain Transactions Analyzed",
-      value: 12500,
-      change: "+22%",
-      icon: Search,
-      color: "text-indigo-600"
-    },
-    {
-      label: "Scam Networks Identified",
-      value: 89,
-      change: "+18%",
-      icon: Target,
-      color: "text-pink-600"
     }
   ];
 
@@ -627,6 +372,57 @@ export default function Home() {
     }
   ];
 
+  const faqs = [
+    {
+      question: "What is Cipher Trace and what services do you provide?",
+      answer: "Cipher Trace is a professional fraud investigation firm specializing in cryptocurrency scams, blockchain tracing, digital asset recovery consultation, and financial fraud investigation. We provide evidence gathering, forensic analysis, and expert guidance for victims working with law enforcement and legal counsel."
+    },
+    {
+      question: "Can you guarantee recovery of stolen cryptocurrency?",
+      answer: "No. Cipher Trace provides fraud investigation, blockchain tracing, intelligence gathering, scam analysis, and recovery consultation services. Recovery outcomes cannot be guaranteed and vary depending on available evidence, jurisdiction, blockchain activity, third-party cooperation, and individual case circumstances."
+    },
+    {
+      question: "How much does a fraud investigation cost?",
+      answer: "Investigation costs vary based on case complexity, required analysis depth, and investigation scope. We offer free initial case reviews to assess your situation and provide transparent pricing before any work begins."
+    },
+    {
+      question: "How long does a typical investigation take?",
+      answer: "Investigation timelines vary significantly based on case complexity. Simple blockchain traces may take 1-2 weeks, while comprehensive fraud investigations involving multiple jurisdictions can take 6-12 weeks or longer. We provide estimated timelines during the initial case review."
+    },
+    {
+      question: "What information do I need to provide for a case review?",
+      answer: "Please provide: transaction details, wallet addresses, communication records with scammers, transaction IDs, exchange information, amounts lost, timeline of events, and any supporting documentation. The more information provided, the more comprehensive our analysis can be."
+    },
+    {
+      question: "Do you work with law enforcement?",
+      answer: "Yes. We regularly collaborate with law enforcement agencies worldwide and provide professional investigation reports suitable for criminal proceedings. We can coordinate with your local authorities and provide expert testimony when needed."
+    }
+  ];
+
+  const blogPosts = [
+    {
+      title: "Understanding Cryptocurrency Scams: A Comprehensive Guide",
+      excerpt: "Learn about the most common cryptocurrency scams and how to protect yourself from fraud.",
+      category: "Fraud Prevention",
+      date: "2026-06-15",
+      readTime: "8 min read"
+    },
+    {
+      title: "Blockchain Forensics: How We Trace Stolen Cryptocurrency",
+      excerpt: "An inside look at the professional tools and techniques used in blockchain investigation.",
+      category: "Blockchain Intelligence",
+      date: "2026-06-10",
+      readTime: "10 min read"
+    },
+    {
+      title: "Romance Scams: Red Flags and Recovery Options",
+      excerpt: "Identifying romance fraud warning signs and steps to take if you've been victimized.",
+      category: "Scam Alerts",
+      date: "2026-06-05",
+      readTime: "6 min read"
+    }
+  ];
+
   return (
     <Layout>
       <SEO 
@@ -634,6 +430,7 @@ export default function Home() {
         description="Expert cryptocurrency scam investigation, blockchain tracing, and digital asset recovery consultation. Helping victims fight back against financial fraud worldwide."
       />
 
+      {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-primary/90 py-20 lg:py-32">
         <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:32px_32px]" />
         <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
