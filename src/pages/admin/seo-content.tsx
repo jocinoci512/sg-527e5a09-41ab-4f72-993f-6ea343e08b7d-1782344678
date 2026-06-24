@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Bell, Plus, Edit, Trash2, Sparkles, Network, FileText, TrendingUp, Eye, Target, Zap, Upload, BarChart3, LineChart, PieChart } from "lucide-react";
+import { Bell, Plus, Edit, Trash2, Sparkles, Network, FileText, TrendingUp, Eye, Target, Zap, Upload, BarChart3, LineChart, PieChart, Download, Link as LinkIcon, Home } from "lucide-react";
 import { seoContentService } from "@/services/seoContentService";
 import { useToast } from "@/hooks/use-toast";
 
@@ -22,11 +22,15 @@ export default function AdminSEOContent() {
   const [activeTab, setActiveTab] = useState("keywords");
   const [editingKeyword, setEditingKeyword] = useState<any>(null);
   const [editingCluster, setEditingCluster] = useState<any>(null);
+  const [viewingTemplate, setViewingTemplate] = useState<any>(null);
   const [isKeywordDialogOpen, setIsKeywordDialogOpen] = useState(false);
   const [isClusterDialogOpen, setIsClusterDialogOpen] = useState(false);
+  const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [isClusteringDialogOpen, setIsClusteringDialogOpen] = useState(false);
   const [importData, setImportData] = useState("");
   const [importPreview, setImportPreview] = useState<any[]>([]);
+  const [clusteringSuggestions, setClusteringSuggestions] = useState<any[]>([]);
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState({ current: 0, total: 0, status: "" });
@@ -57,6 +61,86 @@ export default function AdminSEOContent() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Auto-clustering
+  const handleAutoClustering = async () => {
+    const unassignedKeywords = keywords.filter(k => !k.cluster_id || k.cluster_id === "");
+    if (unassignedKeywords.length === 0) {
+      toast({
+        title: "No Keywords to Cluster",
+        description: "All keywords are already assigned to clusters",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const suggestions = await seoContentService.autoClusterKeywords(
+        unassignedKeywords.map(k => k.id)
+      );
+      setClusteringSuggestions(suggestions);
+      setIsClusteringDialogOpen(true);
+    } catch (error) {
+      console.error("Error auto-clustering:", error);
+      toast({
+        title: "Clustering Failed",
+        description: "Could not generate clustering suggestions",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const applyClusteringSuggestions = async () => {
+    try {
+      await seoContentService.applyClusteringSuggestions(clusteringSuggestions);
+      toast({
+        title: "Clustering Applied",
+        description: `${clusteringSuggestions.length} keywords clustered successfully`
+      });
+      setIsClusteringDialogOpen(false);
+      setClusteringSuggestions([]);
+      loadAllData();
+    } catch (error) {
+      console.error("Error applying clustering:", error);
+      toast({
+        title: "Apply Failed",
+        description: "Could not apply clustering suggestions",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Export functions
+  const exportTemplateMarkdown = (template: any) => {
+    const markdown = seoContentService.exportToMarkdown(template);
+    seoContentService.downloadFile(
+      markdown,
+      `${template.url_slug}.md`,
+      "text/markdown"
+    );
+    toast({
+      title: "Template Exported",
+      description: "Markdown file downloaded successfully"
+    });
+  };
+
+  const exportTemplateJSON = (template: any) => {
+    const json = seoContentService.exportToJSON(template);
+    seoContentService.downloadFile(
+      json,
+      `${template.url_slug}.json`,
+      "application/json"
+    );
+    toast({
+      title: "Template Exported",
+      description: "JSON file downloaded successfully"
+    });
+  };
+
+  const viewTemplateDetails = (template: any) => {
+    setViewingTemplate(template);
+    setIsTemplateDialogOpen(true);
   };
 
   const handleImportKeywords = () => {
@@ -348,11 +432,15 @@ export default function AdminSEOContent() {
     <div className="min-h-screen bg-muted/30">
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-16 items-center gap-4 px-6">
-          <Link href="/admin" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <Image src="/logo.png" alt="Cipher Trace" width={40} height={40} />
-            <span className="font-heading font-bold text-lg">Cipher Trace Admin</span>
+            <span className="font-heading font-bold text-lg">Cipher Trace</span>
           </Link>
           <nav className="flex items-center gap-6 ml-8">
+            <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+              <Home className="h-4 w-4" />
+              Home
+            </Link>
             <Link href="/admin" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               Dashboard
             </Link>
@@ -408,6 +496,10 @@ export default function AdminSEOContent() {
             <Button onClick={handleImportKeywords} variant="outline" disabled={generating}>
               <Upload className="mr-2 h-4 w-4" />
               Import Keywords
+            </Button>
+            <Button onClick={handleAutoClustering} variant="outline" disabled={generating}>
+              <Sparkles className="mr-2 h-4 w-4" />
+              Auto-Cluster
             </Button>
             {selectedKeywords.length > 0 && (
               <Button onClick={handleBulkGenerate} disabled={generating} size="lg">
@@ -635,66 +727,75 @@ export default function AdminSEOContent() {
             </Card>
           </TabsContent>
 
-          {/* TEMPLATES TAB */}
+          {/* TEMPLATES TAB WITH EXPORT BUTTONS */}
           <TabsContent value="templates" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Generated Content Templates</CardTitle>
+                <CardTitle>Content Templates</CardTitle>
                 <CardDescription>
-                  Auto-generated templates with SEO metadata, image prompts, FAQs, and CTAs
+                  Auto-generated templates with SEO metadata, internal links, and export options
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {templates.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
-                    No content templates yet. Go to the "Bulk Generator" tab to create templates from your keywords.
+                    No templates yet. Go to Bulk Generator to create content templates from keywords.
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {templates.map((template) => (
-                      <Card key={template.id} className="border-2">
-                        <CardHeader>
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <CardTitle className="text-lg mb-2">{template.headline}</CardTitle>
-                              <CardDescription>{template.subheadline}</CardDescription>
-                              <div className="flex items-center gap-3 mt-3">
-                                {getStatusBadge(template.status)}
-                                <Badge variant="outline">{template.template_type.replace("_", " ")}</Badge>
-                                <span className="text-xs text-muted-foreground">
-                                  {template.target_word_count} words • {template.estimated_reading_time} min read
-                                </span>
-                              </div>
+                    {templates.map(template => (
+                      <div key={template.id} className="p-4 border-2 rounded-lg hover:border-primary transition-colors">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="font-semibold text-lg">{template.seo_title}</h3>
+                              {getStatusBadge(template.status)}
                             </div>
-                            <Button variant="outline" size="sm">
-                              <Eye className="h-4 w-4 mr-2" />
-                              View Details
+                            <p className="text-sm text-muted-foreground mb-2">
+                              {template.meta_description}
+                            </p>
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                              <Badge variant="outline">
+                                {template.cluster?.cluster_name || "No Cluster"}
+                              </Badge>
+                              <span>• {template.target_word_count} words</span>
+                              <span>• {template.estimated_reading_time} min read</span>
+                              {template.internal_links && template.internal_links.length > 0 && (
+                                <span className="flex items-center gap-1 text-primary">
+                                  <LinkIcon className="h-3 w-3" />
+                                  {template.internal_links.length} internal links
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex gap-2 ml-4">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => viewTemplateDetails(template)}
+                            >
+                              <Eye className="mr-2 h-4 w-4" />
+                              View
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => exportTemplateMarkdown(template)}
+                            >
+                              <Download className="mr-2 h-4 w-4" />
+                              MD
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => exportTemplateJSON(template)}
+                            >
+                              <Download className="mr-2 h-4 w-4" />
+                              JSON
                             </Button>
                           </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <p className="text-muted-foreground mb-1">SEO Title</p>
-                              <p className="font-medium">{template.seo_title}</p>
-                            </div>
-                            <div>
-                              <p className="text-muted-foreground mb-1">URL Slug</p>
-                              <p className="font-mono text-xs">/blog/{template.url_slug}</p>
-                            </div>
-                            <div className="col-span-2">
-                              <p className="text-muted-foreground mb-1">Meta Description</p>
-                              <p className="text-xs">{template.meta_description}</p>
-                            </div>
-                            {template.featured_image_prompt && (
-                              <div className="col-span-2 p-3 bg-muted rounded-lg">
-                                <p className="text-muted-foreground mb-1 text-xs">Featured Image Prompt</p>
-                                <p className="text-xs">{template.featured_image_prompt}</p>
-                              </div>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -988,6 +1089,156 @@ export default function AdminSEOContent() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Template Details Dialog */}
+        <Dialog open={isTemplateDialogOpen} onOpenChange={setIsTemplateDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Content Template Details</DialogTitle>
+              <DialogDescription>
+                Complete SEO template with internal linking suggestions
+              </DialogDescription>
+            </DialogHeader>
+            {viewingTemplate && (
+              <div className="space-y-6 mt-4">
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">{viewingTemplate.headline}</h3>
+                  <p className="text-muted-foreground">{viewingTemplate.subheadline}</p>
+                </div>
+
+                {viewingTemplate.internal_links && viewingTemplate.internal_links.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <LinkIcon className="h-4 w-4" />
+                      Suggested Internal Links
+                    </h4>
+                    <div className="space-y-2">
+                      {viewingTemplate.internal_links.map((link: any, idx: number) => (
+                        <div key={idx} className="p-3 bg-muted rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-sm">{link.title}</p>
+                              <p className="text-xs text-muted-foreground">
+                                Anchor: "{link.anchor_text}"
+                              </p>
+                            </div>
+                            <Badge variant="outline">
+                              {link.relevance}% match
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <h4 className="font-semibold mb-3">Content Sections</h4>
+                  <div className="space-y-3">
+                    {viewingTemplate.main_sections?.map((section: any, idx: number) => (
+                      <div key={idx} className="p-3 bg-muted rounded-lg">
+                        <p className="font-medium">{section.heading}</p>
+                        <p className="text-sm text-muted-foreground">{section.outline}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-3">FAQ Questions</h4>
+                  <div className="space-y-2">
+                    {viewingTemplate.faq_questions?.map((faq: any, idx: number) => (
+                      <div key={idx} className="p-3 bg-muted rounded-lg">
+                        <p className="font-medium text-sm">{faq.question}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{faq.answer}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                  <Button onClick={() => exportTemplateMarkdown(viewingTemplate)} variant="outline">
+                    <Download className="mr-2 h-4 w-4" />
+                    Export Markdown
+                  </Button>
+                  <Button onClick={() => exportTemplateJSON(viewingTemplate)} variant="outline">
+                    <Download className="mr-2 h-4 w-4" />
+                    Export JSON
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Auto-Clustering Dialog */}
+        <Dialog open={isClusteringDialogOpen} onOpenChange={setIsClusteringDialogOpen}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Auto-Clustering Suggestions</DialogTitle>
+              <DialogDescription>
+                Review semantic similarity matches before applying
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              {clusteringSuggestions.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No unassigned keywords to cluster
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">
+                      {clusteringSuggestions.length} keywords analyzed
+                    </p>
+                    <Button onClick={applyClusteringSuggestions}>
+                      Apply All Suggestions
+                    </Button>
+                  </div>
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {clusteringSuggestions.map((suggestion, idx) => (
+                      <div key={idx} className="p-4 border rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-medium">{suggestion.keyword}</span>
+                          {suggestion.suggested_cluster ? (
+                            <Badge variant="default">
+                              {suggestion.confidence}% confidence
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline">No match found</Badge>
+                          )}
+                        </div>
+                        {suggestion.suggested_cluster ? (
+                          <div>
+                            <p className="text-sm text-muted-foreground mb-2">
+                              Suggested: <span className="font-medium text-foreground">
+                                {suggestion.suggested_cluster.cluster_name}
+                              </span>
+                            </p>
+                            {suggestion.alternatives.length > 0 && (
+                              <div className="flex gap-2 mt-2">
+                                <span className="text-xs text-muted-foreground">Alt:</span>
+                                {suggestion.alternatives.map((alt: any, i: number) => (
+                                  <Badge key={i} variant="outline" className="text-xs">
+                                    {alt.cluster.cluster_name} ({alt.confidence}%)
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">
+                            {suggestion.suggestion}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Bulk Import Dialog */}
         <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
