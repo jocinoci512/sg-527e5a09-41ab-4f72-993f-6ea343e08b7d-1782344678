@@ -1,26 +1,23 @@
-
 ---
 title: About Us and Legal Framework
-status: todo
+status: in_progress
 priority: high
 type: feature
-tags: [content, legal, about]
+tags: [content, legal]
 position: 3
 ---
 
 ## Notes
-Establish the company's identity, ethical standards, and legally required pages. Trust is the primary currency for this site, so the About page must feel highly institutional.
+Create the About page with company overview, mission, vision, values, ethical standards, investigation methodology, privacy commitment, and global reach sections. Also create all required legal pages: Privacy Policy, Terms of Service, Disclaimer, and Cookie Policy. These must be comprehensive, professionally written, and compliant with standard business practices.
 
 ## Checklist
-- [ ] Create the About Us page with sections: Company Overview, Mission & Vision, Core Values, and Ethical Standards.
-- [ ] Add an Investigation Methodology and Global Reach section to the About page.
-- [ ] Create a dedicated Privacy Policy page covering data handling and GDPR compliance baselines.
-- [ ] Create a Terms of Service page outlining the scope of engagement.
-- [ ] Create a comprehensive Disclaimer page reiterating the non-guarantee of recovery.
-- [ ] Create a Cookie Policy page and a basic cookie consent banner for the application.
+- [x] Create About page with sections: company overview, mission, vision, core values, ethical standards, investigation methodology, privacy commitment, global reach.
+- [x] Create comprehensive Privacy Policy page covering data collection, usage, sharing, security, retention, and user rights.
+- [x] Create Terms of Service page outlining service description, no recovery guarantee, fees, limitations, and dispute resolution.
+- [x] Create Disclaimer page emphasizing no guarantee of recovery and nature of consultation services.
+- [x] Create Cookie Policy page explaining cookie usage, types, management, and consent.
 
 ## Acceptance
-- About page fully details the company's mission and methodologies.
-- All four legal pages (Privacy, TOS, Disclaimer, Cookies) exist and are linked in the footer.
+- About page presents the company professionally with clear value propositions.
+- All legal pages (Privacy, Terms, Disclaimer, Cookies) exist and are linked in the footer.
 - Cookie banner appears for first-time visitors.
-  

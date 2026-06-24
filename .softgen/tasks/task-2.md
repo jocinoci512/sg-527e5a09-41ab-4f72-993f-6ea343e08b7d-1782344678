@@ -1,6 +1,6 @@
 ---
 title: Homepage and Conversion Flow
-status: in_progress
+status: done
 priority: high
 type: feature
 tags: [marketing, homepage]
