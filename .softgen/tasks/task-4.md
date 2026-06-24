@@ -1,6 +1,6 @@
 ---
 title: Services and Scam Types Directory
-status: in_progress
+status: done
 priority: high
 type: feature
 tags: [services, scams, content]
@@ -14,8 +14,8 @@ The platform requires extensive SEO-optimized content hubs for both what they do
 - [x] Create a main Services directory page listing all investigation and tracing capabilities.
 - [x] Implement a dynamic service detail layout (Overview, Benefits, Process, FAQs, CTA) capable of rendering pages like "Blockchain Transaction Tracing" and "Digital Asset Recovery Consultation".
 - [x] Create a main Scam Types directory explaining the threat landscape.
-- [ ] Implement a dynamic scam detail layout (How it works, Warning signs, Prevention, Investigation options) capable of rendering pages like "Pig Butchering Scams" and "NFT Scams".
-- [ ] Ensure all service and scam pages interlink and push users toward the Case Review intake form.
+- [x] Implement a dynamic scam detail layout (How it works, Warning signs, Prevention, Investigation options) capable of rendering pages like "Pig Butchering Scams" and "NFT Scams".
+- [x] Ensure all service and scam pages interlink and push users toward the Case Review intake form.
 
 ## Acceptance
 - Users can navigate through distinct categories of services and scam types.
