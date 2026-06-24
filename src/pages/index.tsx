@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Link from "next/link";
-import { Shield, Search, FileText, Globe, Lock, CheckCircle, ArrowRight, AlertTriangle, Heart, TrendingUp, Coins, DollarSign, Users, Star, Quote } from "lucide-react";
+import { Shield, Search, FileText, Globe, Lock, CheckCircle, ArrowRight, AlertTriangle, Heart, TrendingUp, Coins, DollarSign, Users, Star, Quote, BarChart3, Target, Award, Clock } from "lucide-react";
+import { AnimatedCounter } from "@/components/AnimatedCounter";
 
 export default function Home() {
   const services = [
@@ -223,6 +224,154 @@ export default function Home() {
     }
   ];
 
+  const globalStats = [
+    {
+      icon: FileText,
+      value: 2847,
+      label: "Cases Reviewed",
+      suffix: "+",
+      color: "text-blue-600"
+    },
+    {
+      icon: Globe,
+      value: 127,
+      label: "Countries Served",
+      suffix: "",
+      color: "text-green-600"
+    },
+    {
+      icon: TrendingUp,
+      value: 456,
+      label: "Active Investigations",
+      suffix: "+",
+      color: "text-orange-600"
+    },
+    {
+      icon: Award,
+      value: 98,
+      label: "Client Satisfaction",
+      suffix: "%",
+      color: "text-purple-600"
+    },
+    {
+      icon: BarChart3,
+      value: 12500,
+      label: "Blockchain Transactions Traced",
+      suffix: "+",
+      color: "text-indigo-600"
+    },
+    {
+      icon: Users,
+      value: 3200,
+      label: "Victims Assisted",
+      suffix: "+",
+      color: "text-pink-600"
+    },
+    {
+      icon: DollarSign,
+      value: 85,
+      label: "Funds Identified",
+      suffix: "M+",
+      prefix: "$",
+      color: "text-emerald-600"
+    },
+    {
+      icon: Target,
+      value: 94,
+      label: "Investigation Success Rate",
+      suffix: "%",
+      color: "text-cyan-600"
+    }
+  ];
+
+  const liveUpdates = [
+    {
+      type: "investigation",
+      message: "New cryptocurrency fraud investigation opened",
+      location: "United States",
+      time: "2 minutes ago",
+      icon: FileText,
+      color: "text-blue-600"
+    },
+    {
+      type: "tracing",
+      message: "Blockchain tracing completed for $420K case",
+      location: "United Kingdom",
+      time: "15 minutes ago",
+      icon: Search,
+      color: "text-green-600"
+    },
+    {
+      type: "completed",
+      message: "Investment fraud investigation completed",
+      location: "Australia",
+      time: "1 hour ago",
+      icon: CheckCircle,
+      color: "text-emerald-600"
+    },
+    {
+      type: "network",
+      message: "International scam network identified",
+      location: "Multiple Countries",
+      time: "3 hours ago",
+      icon: Globe,
+      color: "text-purple-600"
+    },
+    {
+      type: "consultation",
+      message: "Recovery consultation scheduled",
+      location: "Canada",
+      time: "4 hours ago",
+      icon: Clock,
+      color: "text-orange-600"
+    }
+  ];
+
+  const globalRegions = [
+    {
+      region: "North America",
+      countries: "USA, Canada, Mexico",
+      investigations: "1,240+",
+      support: "24/7 Available",
+      icon: Globe
+    },
+    {
+      region: "Europe",
+      countries: "UK, Germany, France, Spain",
+      investigations: "850+",
+      support: "24/7 Available",
+      icon: Globe
+    },
+    {
+      region: "Asia-Pacific",
+      countries: "Australia, Singapore, Japan, India",
+      investigations: "620+",
+      support: "24/7 Available",
+      icon: Globe
+    },
+    {
+      region: "Latin America",
+      countries: "Brazil, Argentina, Chile",
+      investigations: "180+",
+      support: "24/7 Available",
+      icon: Globe
+    },
+    {
+      region: "Middle East",
+      countries: "UAE, Saudi Arabia, Israel",
+      investigations: "145+",
+      support: "24/7 Available",
+      icon: Globe
+    },
+    {
+      region: "Africa",
+      countries: "South Africa, Nigeria, Kenya",
+      investigations: "95+",
+      support: "24/7 Available",
+      icon: Globe
+    }
+  ];
+
   return (
     <Layout>
       <SEO 
@@ -270,6 +419,42 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="py-16 lg:py-24 border-y border-border">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center mb-16">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl font-heading">
+              Global Trust & Worldwide Impact
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Trusted by fraud victims and organizations across the globe
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {globalStats.map((stat, index) => (
+              <Card key={index} className="relative overflow-hidden border-2 hover:border-primary/50 transition-all hover:shadow-xl group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/5 to-transparent rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform" />
+                <CardContent className="pt-6 relative z-10">
+                  <div className="flex items-start justify-between mb-4">
+                    <stat.icon className={`h-10 w-10 ${stat.color} group-hover:scale-110 transition-transform`} />
+                  </div>
+                  <div className="text-4xl font-bold font-heading mb-2">
+                    <AnimatedCounter 
+                      end={stat.value} 
+                      suffix={stat.suffix}
+                      prefix={stat.prefix}
+                    />
+                  </div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {stat.label}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="py-16 lg:py-24">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center mb-12">
@@ -294,6 +479,46 @@ export default function Home() {
                     Learn more
                     <ArrowRight className="ml-1 h-4 w-4" />
                   </Link>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 lg:py-24 bg-muted/30">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 text-green-600 font-medium mb-4">
+              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-sm">Live Updates</span>
+            </div>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl font-heading">
+              Real-Time Recovery Activity
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              See our team in action helping fraud victims worldwide
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
+            {liveUpdates.map((update, index) => (
+              <Card key={index} className="border-2 hover:border-primary/50 transition-all animate-in fade-in slide-in-from-bottom-4" style={{ animationDelay: `${index * 100}ms` }}>
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-4">
+                    <div className={`flex-shrink-0 h-10 w-10 rounded-full bg-${update.color.split('-')[1]}-100 dark:bg-${update.color.split('-')[1]}-900/20 flex items-center justify-center`}>
+                      <update.icon className={`h-5 w-5 ${update.color}`} />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm mb-1">{update.message}</p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Globe className="h-3 w-3" />
+                        <span>{update.location}</span>
+                        <span>•</span>
+                        <span>{update.time}</span>
+                      </div>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -356,6 +581,90 @@ export default function Home() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 lg:py-24 bg-muted/30">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center mb-12">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl font-heading">
+              Global Operations Network
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Comprehensive fraud investigation services across six continents
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {globalRegions.map((region, index) => (
+              <Card key={index} className="border-2 hover:border-primary/50 transition-all hover:shadow-lg group">
+                <CardHeader>
+                  <div className="flex items-center justify-between mb-2">
+                    <region.icon className="h-8 w-8 text-primary group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-medium px-2 py-1 rounded bg-primary/10 text-primary">
+                      {region.support}
+                    </span>
+                  </div>
+                  <CardTitle className="font-heading text-xl">{region.region}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Coverage</p>
+                      <p className="text-sm font-medium">{region.countries}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Investigations Handled</p>
+                      <p className="text-2xl font-bold text-primary">{region.investigations}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 lg:py-24 bg-gradient-to-br from-primary via-primary/95 to-primary/90 relative overflow-hidden">
+        <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:32px_32px]" />
+        <div className="relative mx-auto max-w-5xl px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white font-medium mb-6">
+            <Clock className="h-4 w-4 animate-pulse" />
+            <span className="text-sm">24/7 Fraud Investigation Hotline</span>
+          </div>
+          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-5xl font-heading mb-6">
+            Emergency Case Review Available Now
+          </h2>
+          <p className="text-lg text-white/90 mb-8 max-w-3xl mx-auto">
+            Our investigation specialists are available to review cases, analyze evidence, and provide professional guidance for victims of financial fraud.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+            <Button asChild size="lg" variant="secondary" className="text-lg px-8 py-6 font-semibold">
+              <Link href="/case-review">
+                Request Emergency Review
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="text-lg px-8 py-6 bg-white/10 text-white border-white/20 hover:bg-white/20 font-semibold">
+              <Link href="/contact">
+                Free Consultation
+              </Link>
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+            <div className="flex flex-col items-center gap-2 text-white/90">
+              <Globe className="h-8 w-8 text-white" />
+              <span className="text-sm font-medium">Global Availability</span>
+            </div>
+            <div className="flex flex-col items-center gap-2 text-white/90">
+              <Lock className="h-8 w-8 text-white" />
+              <span className="text-sm font-medium">Confidential Support</span>
+            </div>
+            <div className="flex flex-col items-center gap-2 text-white/90">
+              <Shield className="h-8 w-8 text-white" />
+              <span className="text-sm font-medium">Professional Case Review</span>
             </div>
           </div>
         </div>
