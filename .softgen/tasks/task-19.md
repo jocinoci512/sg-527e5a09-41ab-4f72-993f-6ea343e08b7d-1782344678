@@ -10,30 +10,27 @@ position: 19
 ---
 
 ## Notes
-Create professional multi-step fraud case submission form at /report-scam with 5 steps: Personal Info, Fraud Details, Blockchain Info, Case Description, Evidence Upload. Generate unique case reference IDs (CT-2026-XXXXXX format). Integrate WhatsApp follow-up. Enhance admin case management with status workflow, evidence viewing, and export capabilities.
+Create professional multi-step fraud report form at /report-scam with file upload, case reference ID generation (CT-2026-XXXXXX format), WhatsApp integration, and enhanced admin case management system. Form must validate all inputs, store submissions in database, upload evidence to Supabase Storage, and send email notifications.
 
 ## Checklist
-- [ ] Create /report-scam page with multi-step form component
-- [ ] Implement Step 1: Personal Information (name, email, phone, country, contact method)
-- [ ] Implement Step 2: Fraud Details (type, date, amount, currency, platform, scammer name)
-- [ ] Implement Step 3: Blockchain Info (wallet address, transaction hash, exchange, crypto type)
-- [ ] Implement Step 4: Case Description (detailed description, timeline, notes)
-- [ ] Implement Step 5: Evidence Upload (drag & drop, multi-file, progress indicators)
-- [ ] Implement form validation (required fields, email validation, error messages)
-- [ ] Generate unique case reference IDs (CT-2026-XXXXXX format)
-- [ ] Create confirmation page with reference ID, submission date, estimated review time
-- [ ] Add WhatsApp button with pre-filled message including case reference ID
-- [ ] Update database schema for file uploads (Supabase Storage)
-- [ ] Send email notifications to support@cipherstraces.com
-- [ ] Enhance admin case management with status workflow (Submitted, Under Review, Investigation Started, Awaiting Information, Active Investigation, Consultation Scheduled, Closed)
-- [ ] Add case assignment, internal notes, evidence viewing in admin
-- [ ] Add case export functionality
-- [ ] Add case search and filtering
+- [x] Update database schema with new columns (case_reference_id, incident_date, currency, platform_involved, etc.)
+- [x] Create auto-incrementing case reference ID system (CT-2026-XXXXXX)
+- [x] Build multi-step form component (5 steps: Personal, Fraud Details, Blockchain, Description, Evidence)
+- [x] Implement file upload with drag & drop and progress indicators
+- [x] Add form validation for required fields
+- [x] Create success screen with case reference display
+- [x] Integrate WhatsApp follow-up button with pre-filled message
+- [x] Store submissions in case_reviews table
+- [x] Upload evidence files to Supabase Storage
+- [ ] Enhance admin case management with evidence viewing
+- [ ] Add case assignment functionality
+- [ ] Add case export functionality (CSV/PDF)
+- [ ] Update status workflow in admin dashboard
 
 ## Acceptance
-- Multi-step form works smoothly with validation
-- Files upload to Supabase Storage successfully
-- Unique case reference IDs generated
-- Confirmation page displays with WhatsApp integration
+- Form at /report-scam works smoothly across all devices
+- File uploads succeed and progress displays correctly
+- Case reference IDs generate correctly
+- Success screen displays with WhatsApp integration
 - Admin can view, manage, and update cases
 - Email notifications sent on submission

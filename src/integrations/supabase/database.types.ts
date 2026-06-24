@@ -17,63 +17,107 @@ export type Database = {
     Tables: {
       case_reviews: {
         Row: {
+          additional_notes: string | null
           admin_notes: string | null
           amount_lost: number | null
+          assigned_to: string | null
+          case_reference_id: string | null
           country: string
           created_at: string | null
           cryptocurrency_used: string | null
+          currency: string | null
           email: string
+          estimated_review_date: string | null
+          exchange_used: string | null
           file_attachments: Json | null
           full_name: string
           id: string
+          incident_date: string | null
           incident_description: string
           phone: string | null
+          platform_involved: string | null
+          preferred_contact_method: string | null
           priority: string | null
           scam_type: string
+          scammer_name: string | null
           scammer_website: string | null
           status: string | null
+          timeline_of_events: string | null
+          transaction_hash: string | null
           updated_at: string | null
           wallet_address: string | null
         }
         Insert: {
+          additional_notes?: string | null
           admin_notes?: string | null
           amount_lost?: number | null
+          assigned_to?: string | null
+          case_reference_id?: string | null
           country: string
           created_at?: string | null
           cryptocurrency_used?: string | null
+          currency?: string | null
           email: string
+          estimated_review_date?: string | null
+          exchange_used?: string | null
           file_attachments?: Json | null
           full_name: string
           id?: string
+          incident_date?: string | null
           incident_description: string
           phone?: string | null
+          platform_involved?: string | null
+          preferred_contact_method?: string | null
           priority?: string | null
           scam_type: string
+          scammer_name?: string | null
           scammer_website?: string | null
           status?: string | null
+          timeline_of_events?: string | null
+          transaction_hash?: string | null
           updated_at?: string | null
           wallet_address?: string | null
         }
         Update: {
+          additional_notes?: string | null
           admin_notes?: string | null
           amount_lost?: number | null
+          assigned_to?: string | null
+          case_reference_id?: string | null
           country?: string
           created_at?: string | null
           cryptocurrency_used?: string | null
+          currency?: string | null
           email?: string
+          estimated_review_date?: string | null
+          exchange_used?: string | null
           file_attachments?: Json | null
           full_name?: string
           id?: string
+          incident_date?: string | null
           incident_description?: string
           phone?: string | null
+          platform_involved?: string | null
+          preferred_contact_method?: string | null
           priority?: string | null
           scam_type?: string
+          scammer_name?: string | null
           scammer_website?: string | null
           status?: string | null
+          timeline_of_events?: string | null
+          transaction_hash?: string | null
           updated_at?: string | null
           wallet_address?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "case_reviews_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contact_leads: {
         Row: {
@@ -531,7 +575,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_case_reference_id: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
