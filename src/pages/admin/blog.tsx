@@ -8,9 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Bell, Plus, Edit, Trash2, Eye, Save, X, Home } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Bell, Plus, Edit, Trash2, Eye, Save, X, Home, CheckCircle, Clock, Archive, AlertTriangle, Rocket } from "lucide-react";
 import { blogService } from "@/services/blogService";
+import { publishingService } from "@/services/publishingService";
 import { useToast } from "@/hooks/use-toast";
 
 export default function AdminBlog() {
@@ -20,6 +22,8 @@ export default function AdminBlog() {
   const [editingPost, setEditingPost] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [publishingPost, setPublishingPost] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -45,6 +49,91 @@ export default function AdminBlog() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleOneClickPublish = async (post: any) => {
+    setPublishingPost(post.id);
+    try {
+      const validation = publishingService.validateBlogPost(post);
+      
+      if (!validation.isValid) {
+        setValidationErrors(validation.errors);
+        toast({
+          title: "Validation Failed",
+          description: `Cannot publish: ${validation.errors.join(", ")}`,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      await publishingService.publishPost(post.id, "Support@cipherstraces.com");
+      toast({
+        title: "✅ Published Successfully!",
+        description: `"${post.title}" is now live on your website`
+      });
+      loadData();
+    } catch (error: any) {
+      console.error("Error publishing post:", error);
+      toast({
+        title: "Publish Failed",
+        description: error.message || "Could not publish blog post",
+        variant: "destructive"
+      });
+    } finally {
+      setPublishingPost(null);
+      setValidationErrors([]);
+    }
+  };
+
+  const handleUnpublish = async (postId: string) => {
+    try {
+      await publishingService.unpublishPost(postId, "Support@cipherstraces.com");
+      toast({ title: "Unpublished", description: "Blog post has been unpublished" });
+      loadData();
+    } catch (error) {
+      console.error("Error unpublishing:", error);
+      toast({ title: "Error", description: "Could not unpublish post", variant: "destructive" });
+    }
+  };
+
+  const handleArchive = async (postId: string) => {
+    try {
+      await publishingService.archivePost(postId, "Support@cipherstraces.com");
+      toast({ title: "Archived", description: "Blog post has been archived" });
+      loadData();
+    } catch (error) {
+      console.error("Error archiving:", error);
+      toast({ title: "Error", description: "Could not archive post", variant: "destructive" });
+    }
+  };
+
+  const handleMoveToReview = async (postId: string) => {
+    try {
+      await publishingService.moveToReview(postId, "Support@cipherstraces.com");
+      toast({ title: "Moved to Review", description: "Blog post is ready for review" });
+      loadData();
+    } catch (error) {
+      console.error("Error moving to review:", error);
+      toast({ title: "Error", description: "Could not move to review", variant: "destructive" });
+    }
+  };
+
+  const getReviewStatusBadge = (reviewStatus: string) => {
+    const variants: Record<string, any> = {
+      draft: { variant: "secondary", label: "DRAFT", icon: Edit },
+      review: { variant: "outline", label: "IN REVIEW", icon: Eye },
+      scheduled: { variant: "default", label: "SCHEDULED", icon: Clock },
+      published: { variant: "default", label: "PUBLISHED", icon: CheckCircle },
+      archived: { variant: "secondary", label: "ARCHIVED", icon: Archive }
+    };
+    const config = variants[reviewStatus] || { variant: "secondary", label: reviewStatus.toUpperCase(), icon: Edit };
+    const Icon = config.icon;
+    return (
+      <Badge variant={config.variant} className="flex items-center gap-1">
+        <Icon className="h-3 w-3" />
+        {config.label}
+      </Badge>
+    );
   };
 
   const handleCreateNew = () => {
@@ -117,27 +206,6 @@ export default function AdminBlog() {
     }
   };
 
-  const handlePublish = async (post: any) => {
-    try {
-      await blogService.updatePost(post.id, {
-        status: post.status === "published" ? "draft" : "published",
-        published_at: post.status === "draft" ? new Date().toISOString() : null
-      });
-      toast({
-        title: post.status === "draft" ? "Post Published" : "Post Unpublished",
-        description: `Blog post is now ${post.status === "draft" ? "live" : "hidden"}`
-      });
-      loadData();
-    } catch (error) {
-      console.error("Error updating post status:", error);
-      toast({
-        title: "Update Failed",
-        description: "Could not update post status",
-        variant: "destructive"
-      });
-    }
-  };
-
   return (
     <div className="min-h-screen bg-muted/30">
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -157,20 +225,11 @@ export default function AdminBlog() {
             <Link href="/admin/cases" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               Cases
             </Link>
-            <Link href="/admin/leads" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Leads
-            </Link>
             <Link href="/admin/blog" className="text-sm font-medium text-foreground hover:text-foreground transition-colors">
               Blog
             </Link>
-            <Link href="/admin/content" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Content
-            </Link>
-            <Link href="/admin/seo" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              SEO
-            </Link>
-            <Link href="/admin/homepage" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Homepage
+            <Link href="/admin/seo-content" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              SEO Content
             </Link>
             <Link href="/admin/notifications" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               <Bell className="h-4 w-4" />
@@ -188,13 +247,27 @@ export default function AdminBlog() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground font-heading">Blog Management</h1>
-            <p className="text-muted-foreground mt-2">Create, edit, and publish blog posts</p>
+            <p className="text-muted-foreground mt-2">Create, edit, and publish blog posts with one-click publishing</p>
           </div>
           <Button onClick={handleCreateNew}>
             <Plus className="mr-2 h-4 w-4" />
             Create New Post
           </Button>
         </div>
+
+        {validationErrors.length > 0 && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              <p className="font-semibold mb-2">Validation Errors:</p>
+              <ul className="list-disc list-inside space-y-1">
+                {validationErrors.map((error, idx) => (
+                  <li key={idx} className="text-sm">{error}</li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Filter */}
         <Card className="mb-6">
@@ -215,7 +288,7 @@ export default function AdminBlog() {
           </CardContent>
         </Card>
 
-        {/* Posts List */}
+        {/* Posts List with One-Click Publishing */}
         <div className="grid grid-cols-1 gap-6">
           {loading ? (
             <div className="text-center py-12 text-muted-foreground">Loading posts...</div>
@@ -233,9 +306,7 @@ export default function AdminBlog() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="font-semibold text-xl font-heading">{post.title}</h3>
-                        <Badge variant={post.status === "published" ? "default" : "secondary"}>
-                          {post.status}
-                        </Badge>
+                        {getReviewStatusBadge(post.review_status || "draft")}
                       </div>
                       <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                         {post.excerpt}
@@ -252,28 +323,59 @@ export default function AdminBlog() {
                         </span>
                       </div>
                     </div>
-                    <div className="flex gap-2 ml-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handlePublish(post)}
-                      >
-                        {post.status === "published" ? "Unpublish" : "Publish"}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(post)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(post.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                    <div className="flex flex-col gap-2 ml-4">
+                      {post.status !== "published" ? (
+                        <Button
+                          size="sm"
+                          onClick={() => handleOneClickPublish(post)}
+                          disabled={publishingPost === post.id}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          <Rocket className="mr-2 h-4 w-4" />
+                          {publishingPost === post.id ? "Publishing..." : "Publish Now"}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleUnpublish(post.id)}
+                        >
+                          Unpublish
+                        </Button>
+                      )}
+                      {post.review_status === "draft" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleMoveToReview(post.id)}
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          Move to Review
+                        </Button>
+                      )}
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(post)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleArchive(post.id)}
+                        >
+                          <Archive className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDelete(post.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
