@@ -7,15 +7,34 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
-import { Shield, FileText, Clock, Lock, CheckCircle } from "lucide-react";
+import { Shield, FileText, Clock, Lock, CheckCircle, PlayCircle } from "lucide-react";
 import Link from "next/link";
 import { caseService } from "@/services/caseService";
 import { useToast } from "@/hooks/use-toast";
+import { VideoEmbed } from "@/components/VideoEmbed";
 
 export default function CaseReview() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
+
+  const educationalVideos = [
+    {
+      vimeoId: "996807223",
+      title: "How Our Investigation Process Works",
+      description: "Learn about our professional fraud investigation methodology and blockchain tracing capabilities."
+    },
+    {
+      vimeoId: "996807160",
+      title: "What to Expect During Case Review",
+      description: "Our team explains the case review process and what information helps us assess your situation effectively."
+    },
+    {
+      vimeoId: "996807100",
+      title: "Understanding Evidence Collection",
+      description: "Essential guidance on gathering and preserving evidence for cryptocurrency fraud investigations."
+    }
+  ];
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -125,6 +144,7 @@ export default function CaseReview() {
         description="Submit your fraud case for professional review. Our blockchain investigation team will analyze your situation and provide expert guidance on recovery options."
       />
 
+      {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-primary/90 py-20 lg:py-32">
         <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:32px_32px]" />
         <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
@@ -139,6 +159,53 @@ export default function CaseReview() {
         </div>
       </section>
 
+      {/* NEW: Educational Video Section */}
+      <section className="py-16 lg:py-24 bg-muted/30 border-b border-border">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium mb-4">
+              <PlayCircle className="h-4 w-4" />
+              <span className="text-sm">Watch Before You Submit</span>
+            </div>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl font-heading">
+              Understanding the Investigation Process
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Learn what to expect and how to prepare for your case review
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 mb-12">
+            {educationalVideos.map((video, index) => (
+              <div key={index}>
+                <VideoEmbed
+                  vimeoId={video.vimeoId}
+                  title={video.title}
+                  description={video.description}
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="max-w-3xl mx-auto bg-background border-2 border-border rounded-lg p-6">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Shield className="h-6 w-6 text-primary" />
+                </div>
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg mb-2 font-heading">Why Watch These Videos?</h3>
+                <p className="text-muted-foreground text-sm">
+                  These videos will help you understand our investigation methodology, what information we need to assess your case effectively, and what to expect during the review process. Being informed helps us work together more efficiently to address your situation.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Form Section - Keep existing exactly as is */}
       <section className="py-16 lg:py-24">
         <div className="mx-auto max-w-5xl px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
