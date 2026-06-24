@@ -13,10 +13,10 @@ position: 9
 Implement a site-wide dark mode toggle for improved accessibility and user preference. The dark mode CSS variables are already defined in globals.css. Need to integrate the existing ThemeSwitch component into the Header and ensure proper theme persistence across page navigation.
 
 ## Checklist
-- [ ] Integrate ThemeSwitch component into Header navigation
-- [ ] Ensure theme preference persists across sessions (localStorage)
-- [ ] Verify dark mode styling across all pages
-- [ ] Test theme transitions are smooth and accessible
+- [x] Integrate ThemeSwitch component into Header navigation
+- [x] Ensure theme preference persists across sessions (localStorage)
+- [x] Verify dark mode styling across all pages
+- [x] Test theme transitions are smooth and accessible
 
 ## Acceptance
 - Users can toggle between light and dark modes from the header

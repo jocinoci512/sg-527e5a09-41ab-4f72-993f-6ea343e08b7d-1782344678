@@ -1,10 +1,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ThemeSwitch } from "@/components/ThemeSwitch";
 
-export function Header() {
+interface HeaderProps {
+  onSearchClick?: () => void;
+}
+
+export function Header({ onSearchClick }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const [scamsOpen, setScamsOpen] = useState(false);
@@ -36,7 +41,15 @@ export function Header() {
           </Link>
         </div>
         
-        <div className="flex lg:hidden">
+        <div className="flex lg:hidden gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onSearchClick}
+            aria-label="Search"
+          >
+            <Search className="h-5 w-5" />
+          </Button>
           <button
             type="button"
             className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-foreground"
@@ -131,7 +144,20 @@ export function Header() {
           </Link>
         </div>
         
-        <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+        <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onSearchClick}
+            className="gap-2"
+          >
+            <Search className="h-4 w-4" />
+            <span className="hidden xl:inline">Search</span>
+            <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 xl:flex">
+              <span className="text-xs">⌘</span>K
+            </kbd>
+          </Button>
+          <ThemeSwitch />
           <Button asChild size="lg" className="font-semibold">
             <Link href="/case-review">Start Free Case Review</Link>
           </Button>
@@ -201,8 +227,9 @@ export function Header() {
               Contact
             </Link>
             
-            <div className="pt-4">
-              <Button asChild className="w-full font-semibold" size="lg">
+            <div className="pt-4 flex items-center gap-2">
+              <ThemeSwitch />
+              <Button asChild className="flex-1 font-semibold" size="lg">
                 <Link href="/case-review">Start Free Case Review</Link>
               </Button>
             </div>

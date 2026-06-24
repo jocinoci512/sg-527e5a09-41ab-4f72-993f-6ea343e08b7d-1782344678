@@ -1,6 +1,6 @@
 ---
 title: Global Site-Wide Search Modal
-status: todo
+status: in_progress
 priority: high
 type: feature
 tags: [search, navigation, ux]
@@ -13,12 +13,12 @@ position: 10
 Create a global command-palette style search modal that users can access via keyboard shortcut (Cmd+K / Ctrl+K) or button click. The modal should allow quick navigation to scam types, services, legal pages, and blog articles.
 
 ## Checklist
-- [ ] Create SearchModal component using Command component from shadcn/ui
-- [ ] Add keyboard shortcut support (Cmd+K / Ctrl+K)
-- [ ] Index all major pages: services, scam types, legal docs, FAQs
-- [ ] Add search trigger button to Header
-- [ ] Implement fuzzy search filtering
-- [ ] Add keyboard navigation within results
+- [x] Create SearchModal component using Command component from shadcn/ui
+- [x] Add keyboard shortcut support (Cmd+K / Ctrl+K)
+- [x] Index all major pages: services, scam types, legal docs, FAQs
+- [x] Add search trigger button to Header
+- [x] Implement fuzzy search filtering
+- [x] Add keyboard navigation within results
 
 ## Acceptance
 - Users can open search modal via keyboard shortcut or button
