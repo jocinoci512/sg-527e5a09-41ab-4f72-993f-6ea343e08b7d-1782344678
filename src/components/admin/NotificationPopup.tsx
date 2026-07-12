@@ -1,102 +1,73 @@
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { Bell } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { X, Bell, Volume2, VolumeX } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { emailService } from "@/services/emailService";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 
-interface Notification {
-  id: string;
-  fullName: string;
-  country: string;
-  scamType: string;
-  createdAt: string;
-}
-
-interface NotificationPopupProps {
-  notification: Notification | null;
-  onClose: () => void;
-  soundEnabled?: boolean;
-}
-
-export function NotificationPopup({ notification, onClose, soundEnabled = true }: NotificationPopupProps) {
-  const [isVisible, setIsVisible] = useState(false);
-  const [soundOn, setSoundOn] = useState(soundEnabled);
+export function NotificationPopup() {
+  const [recentCount, setRecentCount] = useState(0);
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
-    if (notification) {
-      setIsVisible(true);
-      
-      if (soundOn) {
-        const audio = new Audio("data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE=");
-        audio.play().catch(() => {});
-      }
-      
-      const timer = setTimeout(() => {
-        setIsVisible(false);
-        setTimeout(() => onClose?.(), 300);
-      }, 8000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [notification, soundOn, onClose]);
+    loadRecentNotifications();
+    const interval = setInterval(loadRecentNotifications, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, []);
 
-  if (!notification || !isVisible) return null;
+  const loadRecentNotifications = async () => {
+    try {
+      const notifications = await emailService.getNotificationHistory({ limit: 50 });
+      const last24Hours = notifications.filter(n => {
+        const sentDate = new Date(n.sent_at);
+        const now = new Date();
+        const hoursDiff = (now.getTime() - sentDate.getTime()) / (1000 * 60 * 60);
+        return hoursDiff <= 24;
+      });
+      setRecentCount(last24Hours.length);
+    } catch (error) {
+      console.error("Error loading notifications:", error);
+    }
+  };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-5">
-      <Card className="w-96 border-primary shadow-lg">
-        <CardHeader className="relative pb-3">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-              <CardTitle className="text-base">New Case Submission</CardTitle>
-            </div>
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={() => setSoundOn(!soundOn)}
-              >
-                {soundOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={() => {
-                  setIsVisible(false);
-                  setTimeout(() => onClose?.(), 300);
-                }}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
+    <div className="relative">
+      <Button
+        variant="ghost"
+        size="sm"
+        className="relative"
+        onClick={() => setShowPopup(!showPopup)}
+      >
+        <Bell className="h-5 w-5" />
+        {recentCount > 0 && (
+          <Badge 
+            variant="destructive" 
+            className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+          >
+            {recentCount > 9 ? "9+" : recentCount}
+          </Badge>
+        )}
+      </Button>
 
-        <CardContent className="space-y-4">
-          <div className="space-y-2 text-sm">
-            <div>
-              <span className="font-medium">Name:</span> {notification.fullName}
+      {showPopup && (
+        <Card className="absolute right-0 top-12 w-80 shadow-xl z-50">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold">Recent Notifications</h3>
+              <Badge>{recentCount} new</Badge>
             </div>
-            <div>
-              <span className="font-medium">Country:</span> {notification.country}
-            </div>
-            <div>
-              <span className="font-medium">Scam Type:</span> {notification.scamType}
-            </div>
-            <div className="text-xs text-muted-foreground">
-              {new Date(notification.createdAt).toLocaleString()}
-            </div>
-          </div>
-
-          <Button asChild className="w-full">
-            <Link href="/admin/cases">View All Cases</Link>
-          </Button>
-        </CardContent>
-      </Card>
+            <p className="text-sm text-muted-foreground mb-4">
+              {recentCount} email notifications sent in the last 24 hours
+            </p>
+            <Button asChild className="w-full" size="sm">
+              <Link href="/admin/notifications">
+                View All Notifications
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

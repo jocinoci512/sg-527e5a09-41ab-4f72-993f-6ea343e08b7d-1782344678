@@ -12,6 +12,7 @@ import Link from "next/link";
 import { caseService } from "@/services/caseService";
 import { useToast } from "@/hooks/use-toast";
 import { VideoEmbed } from "@/components/VideoEmbed";
+import { emailService } from "@/services/emailService";
 
 export default function CaseReview() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,6 +68,25 @@ export default function CaseReview() {
         title: "Case Review Submitted",
         description: "Our team will contact you within 24-48 hours.",
       });
+
+      try {
+        await emailService.logEmailNotification({
+          notification_type: "case_submission",
+          recipient_email: "Support@cipherstraces.com",
+          subject: `New Case Submission: ${caseData.scam_type} - ${caseData.full_name}`,
+          template_name: "case_submission",
+          case_id: caseData.id,
+          status: "sent",
+          metadata: {
+            scam_type: caseData.scam_type,
+            amount_lost: caseData.amount_lost,
+            submitted_at: new Date().toISOString()
+          }
+        });
+      } catch (emailError) {
+        console.error("Email notification failed:", emailError);
+        // Don't fail the submission if email fails
+      }
     } catch (error) {
       console.error("Error submitting case review:", error);
       toast({

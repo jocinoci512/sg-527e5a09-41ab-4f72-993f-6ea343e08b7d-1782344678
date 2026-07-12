@@ -1,146 +1,120 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Bell, BellOff, Check, CheckCheck, Search, Filter, FileText, AlertCircle, TrendingUp, User } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-
-interface NotificationItem {
-  id: string;
-  type: "case" | "lead" | "status" | "system";
-  title: string;
-  message: string;
-  createdAt: string;
-  isRead: boolean;
-  metadata?: {
-    caseId?: string;
-    leadId?: string;
-    status?: string;
-  };
-}
+import { Input } from "@/components/ui/input";
+import { 
+  Bell, 
+  Home, 
+  Mail, 
+  CheckCircle, 
+  XCircle, 
+  Clock,
+  Search,
+  Filter,
+  RefreshCw
+} from "lucide-react";
+import { emailService } from "@/services/emailService";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminNotifications() {
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [filterType, setFilterType] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showUnreadOnly, setShowUnreadOnly] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const { toast } = useToast();
 
-  // Mock data - will be replaced with Supabase real-time subscriptions
-  const notifications: NotificationItem[] = [
-    {
-      id: "1",
-      type: "case",
-      title: "New Case Submission",
-      message: "John Doe submitted a cryptocurrency fraud case from United States",
-      createdAt: "2026-06-24T00:30:00Z",
-      isRead: false,
-      metadata: { caseId: "case-123" },
-    },
-    {
-      id: "2",
-      type: "lead",
-      title: "New Contact Form",
-      message: "Sarah Johnson sent a general inquiry via contact form",
-      createdAt: "2026-06-24T00:15:00Z",
-      isRead: false,
-      metadata: { leadId: "lead-456" },
-    },
-    {
-      id: "3",
-      type: "status",
-      title: "Case Status Updated",
-      message: "Case #117 status changed to 'Under Investigation'",
-      createdAt: "2026-06-23T23:45:00Z",
-      isRead: true,
-      metadata: { caseId: "case-117", status: "under_investigation" },
-    },
-    {
-      id: "4",
-      type: "case",
-      title: "New Case Submission",
-      message: "Michael Chen submitted a pig butchering scam case from Canada",
-      createdAt: "2026-06-23T22:30:00Z",
-      isRead: true,
-      metadata: { caseId: "case-122" },
-    },
-  ];
+  useEffect(() => {
+    loadNotifications();
+  }, [typeFilter]);
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
-
-  const handleMarkAsRead = (id: string) => {
-    // TODO: Update notification status in Supabase
-    console.log("Mark as read:", id);
-  };
-
-  const handleMarkAllAsRead = () => {
-    // TODO: Bulk update all notifications in Supabase
-    console.log("Mark all as read");
-  };
-
-  const getNotificationIcon = (type: NotificationItem["type"]) => {
-    switch (type) {
-      case "case":
-        return FileText;
-      case "lead":
-        return User;
-      case "status":
-        return TrendingUp;
-      case "system":
-        return AlertCircle;
-      default:
-        return Bell;
+  const loadNotifications = async () => {
+    try {
+      setLoading(true);
+      const filters = typeFilter !== "all" ? { notification_type: typeFilter } : {};
+      const data = await emailService.getNotificationHistory(filters);
+      setNotifications(data);
+    } catch (error) {
+      console.error("Error loading notifications:", error);
+      toast({
+        title: "Error",
+        description: "Could not load notification history",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const filteredNotifications = notifications.filter((notification) => {
-    const matchesType = filterType === "all" || notification.type === filterType;
-    const matchesSearch = notification.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         notification.message.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesReadStatus = !showUnreadOnly || !notification.isRead;
-    
-    return matchesType && matchesSearch && matchesReadStatus;
-  });
+  const filteredNotifications = notifications.filter(notif =>
+    notif.recipient_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    notif.subject.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const getStatusBadge = (status: string) => {
+    const variants: Record<string, any> = {
+      sent: { variant: "default", label: "SENT", icon: CheckCircle, color: "text-green-600" },
+      failed: { variant: "destructive", label: "FAILED", icon: XCircle, color: "text-red-600" },
+      pending: { variant: "secondary", label: "PENDING", icon: Clock, color: "text-yellow-600" }
+    };
+    const config = variants[status] || variants.sent;
+    const Icon = config.icon;
+    return (
+      <Badge variant={config.variant} className="flex items-center gap-1">
+        <Icon className="h-3 w-3" />
+        {config.label}
+      </Badge>
+    );
+  };
+
+  const getTypeBadge = (type: string) => {
+    const typeLabels: Record<string, string> = {
+      case_submission: "Case Submission",
+      contact_inquiry: "Contact Inquiry",
+      scam_report: "Scam Report",
+      blog_comment: "Blog Comment"
+    };
+    return (
+      <Badge variant="outline">
+        {typeLabels[type] || type}
+      </Badge>
+    );
+  };
+
+  const totalSent = notifications.filter(n => n.status === "sent").length;
+  const totalFailed = notifications.filter(n => n.status === "failed").length;
+  const notificationTypes = [...new Set(notifications.map(n => n.notification_type))];
 
   return (
     <div className="min-h-screen bg-muted/30">
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-16 items-center gap-4 px-6">
-          <Link href="/admin" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <Image src="/logo.png" alt="Cipher Trace" width={40} height={40} />
             <span className="font-heading font-bold text-lg">Cipher Trace Admin</span>
           </Link>
           <nav className="flex items-center gap-6 ml-8">
+            <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+              <Home className="h-4 w-4" />
+              Home
+            </Link>
             <Link href="/admin" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               Dashboard
             </Link>
             <Link href="/admin/cases" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               Cases
             </Link>
-            <Link href="/admin/leads" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Leads
-            </Link>
             <Link href="/admin/blog" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               Blog
             </Link>
-            <Link href="/admin/content" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Content
+            <Link href="/admin/vimeo" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              Video Library
             </Link>
-            <Link href="/admin/reports" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Reports
-            </Link>
-            <Link href="/admin/notifications" className="text-sm font-medium text-foreground hover:text-foreground transition-colors relative">
-              Notifications
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
-                  {unreadCount}
-                </span>
-              )}
+            <Link href="/admin/notifications" className="text-sm font-medium text-foreground">
+              <Bell className="h-4 w-4" />
             </Link>
           </nav>
           <div className="ml-auto">
@@ -151,168 +125,163 @@ export default function AdminNotifications() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto p-6 space-y-6">
-        <div className="flex items-center justify-between">
+      <main className="p-6">
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold font-heading mb-2">Notifications</h1>
-            <p className="text-muted-foreground">
-              Real-time alerts and activity feed
-            </p>
+            <h1 className="text-3xl font-bold text-foreground font-heading flex items-center gap-3">
+              <Bell className="h-8 w-8 text-primary" />
+              Email Notifications
+            </h1>
+            <p className="text-muted-foreground mt-2">Monitor automated email notifications and delivery status</p>
           </div>
-          {unreadCount > 0 && (
-            <Button onClick={handleMarkAllAsRead} variant="outline">
-              <CheckCheck className="mr-2 h-4 w-4" />
-              Mark All as Read
-            </Button>
-          )}
+          <Button onClick={loadNotifications} variant="outline">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Refresh
+          </Button>
         </div>
 
-        {/* Settings Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Notification Settings</CardTitle>
-            <CardDescription>Configure how you receive notifications</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="sound-alerts" className="text-base">
-                  Sound Alerts
-                </Label>
-                <p className="text-sm text-muted-foreground">
-                  Play a sound when new cases are submitted
-                </p>
-              </div>
-              <Switch
-                id="sound-alerts"
-                checked={soundEnabled}
-                onCheckedChange={setSoundEnabled}
-              />
-            </div>
-          </CardContent>
-        </Card>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Sent</CardTitle>
+              <Mail className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{notifications.length}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Successfully Delivered</CardTitle>
+              <CheckCircle className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">{totalSent}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Failed</CardTitle>
+              <XCircle className="h-4 w-4 text-red-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">{totalFailed}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Notification Types</CardTitle>
+              <Filter className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{notificationTypes.length}</div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Filters */}
-        <Card>
+        <Card className="mb-6">
           <CardContent className="pt-6">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search notifications..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
-                />
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by email or subject..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
               </div>
-              <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <Filter className="mr-2 h-4 w-4" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="case">Cases</SelectItem>
-                  <SelectItem value="lead">Leads</SelectItem>
-                  <SelectItem value="status">Status Updates</SelectItem>
-                  <SelectItem value="system">System</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="flex items-center gap-2">
-                <Switch
-                  id="unread-only"
-                  checked={showUnreadOnly}
-                  onCheckedChange={setShowUnreadOnly}
-                />
-                <Label htmlFor="unread-only" className="cursor-pointer">
-                  Unread only
-                </Label>
+              <div className="w-full md:w-[200px]">
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Filter by type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    {notificationTypes.map(type => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Notifications List */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Activity Feed</CardTitle>
-            <CardDescription>
-              {filteredNotifications.length} notification{filteredNotifications.length !== 1 ? "s" : ""}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {filteredNotifications.length === 0 ? (
-                <div className="text-center py-12">
-                  <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No notifications to display</p>
-                </div>
-              ) : (
-                filteredNotifications.map((notification) => {
-                  const Icon = getNotificationIcon(notification.type);
-                  return (
-                    <div
-                      key={notification.id}
-                      className={cn(
-                        "flex items-start gap-4 p-4 rounded-lg border transition-colors hover:bg-muted/50",
-                        !notification.isRead && "bg-primary/5 border-primary/20"
-                      )}
-                    >
-                      <div className={cn(
-                        "p-2 rounded-full",
-                        !notification.isRead ? "bg-primary/10" : "bg-muted"
-                      )}>
-                        <Icon className={cn(
-                          "h-4 w-4",
-                          !notification.isRead ? "text-primary" : "text-muted-foreground"
-                        )} />
+        {loading ? (
+          <div className="text-center py-12 text-muted-foreground">Loading notifications...</div>
+        ) : filteredNotifications.length === 0 ? (
+          <Card>
+            <CardContent className="pt-12 pb-12 text-center">
+              <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">No notifications found</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            {filteredNotifications.map((notification) => (
+              <Card key={notification.id} className="hover:shadow-lg transition-shadow">
+                <CardContent className="pt-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Mail className="h-5 w-5 text-primary" />
+                        <h3 className="font-semibold text-lg">{notification.subject}</h3>
+                        {getStatusBadge(notification.status)}
+                        {getTypeBadge(notification.notification_type)}
                       </div>
-                      <div className="flex-1 space-y-1">
-                        <div className="flex items-start justify-between gap-2">
-                          <h4 className="font-medium leading-none">{notification.title}</h4>
-                          <span className="text-xs text-muted-foreground whitespace-nowrap">
-                            {format(new Date(notification.createdAt), "MMM d, h:mm a")}
+                      
+                      <div className="space-y-2 mt-4">
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="text-muted-foreground">To:</span>
+                          <span className="font-medium">{notification.recipient_email}</span>
+                        </div>
+                        
+                        {notification.template_name && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <span className="text-muted-foreground">Template:</span>
+                            <span>{notification.template_name}</span>
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center gap-2 text-sm">
+                          <Clock className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-muted-foreground">
+                            {new Date(notification.sent_at).toLocaleString()}
                           </span>
                         </div>
-                        <p className="text-sm text-muted-foreground">{notification.message}</p>
-                        {notification.metadata?.caseId && (
-                          <Button variant="link" size="sm" className="h-auto p-0 text-xs" asChild>
-                            <Link href={`/admin/cases`}>
-                              View Case →
-                            </Link>
-                          </Button>
+
+                        {notification.error_message && (
+                          <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-800">
+                            <strong>Error:</strong> {notification.error_message}
+                          </div>
+                        )}
+
+                        {notification.case_id && (
+                          <div className="mt-3">
+                            <Button asChild variant="outline" size="sm">
+                              <Link href={`/admin/cases?id=${notification.case_id}`}>
+                                View Related Case
+                              </Link>
+                            </Button>
+                          </div>
                         )}
                       </div>
-                      {!notification.isRead && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleMarkAsRead(notification.id)}
-                          className="shrink-0"
-                        >
-                          <Check className="h-4 w-4" />
-                        </Button>
-                      )}
                     </div>
-                  );
-                })
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Real-time Status */}
-        <Card className="border-green-500/50 bg-green-500/5">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-sm">
-              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="font-medium">Real-time notifications active</span>
-              <span className="text-muted-foreground">
-                • Connected to live feed (Supabase connection required for full functionality)
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );

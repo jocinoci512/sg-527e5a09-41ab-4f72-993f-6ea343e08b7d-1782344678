@@ -475,6 +475,66 @@ export type Database = {
         }
         Relationships: []
       }
+      email_notifications_log: {
+        Row: {
+          case_id: string | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          lead_id: string | null
+          metadata: Json | null
+          notification_type: string
+          recipient_email: string
+          sent_at: string | null
+          status: string | null
+          subject: string
+          template_name: string | null
+        }
+        Insert: {
+          case_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          lead_id?: string | null
+          metadata?: Json | null
+          notification_type: string
+          recipient_email: string
+          sent_at?: string | null
+          status?: string | null
+          subject: string
+          template_name?: string | null
+        }
+        Update: {
+          case_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          lead_id?: string | null
+          metadata?: Json | null
+          notification_type?: string
+          recipient_email?: string
+          sent_at?: string | null
+          status?: string | null
+          subject?: string
+          template_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_notifications_log_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "case_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_notifications_log_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "contact_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       homepage_dashboard_metrics: {
         Row: {
           change: string
@@ -1461,6 +1521,57 @@ export type Database = {
           week_end_date?: string
           week_start_date?: string
           weekly_traffic_growth?: number | null
+        }
+        Relationships: []
+      }
+      video_library: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          duration: number | null
+          embed_url: string
+          id: string
+          status: string | null
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string | null
+          upload_date: string | null
+          views: number | null
+          vimeo_video_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration?: number | null
+          embed_url: string
+          id?: string
+          status?: string | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string | null
+          upload_date?: string | null
+          views?: number | null
+          vimeo_video_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration?: number | null
+          embed_url?: string
+          id?: string
+          status?: string | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string | null
+          upload_date?: string | null
+          views?: number | null
+          vimeo_video_id?: string
         }
         Relationships: []
       }
