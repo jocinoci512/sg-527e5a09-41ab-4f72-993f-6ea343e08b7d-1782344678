@@ -11,10 +11,9 @@ Disallow: /admin
 
 # Block API routes (except sitemap)
 Disallow: /api/
-Allow: /api/sitemap.xml
 
-# Sitemap location
-Sitemap: https://cipherstraces.com/api/sitemap.xml
+# Sitemap location (standard Google format)
+Sitemap: https://cipherstraces.com/sitemap.xml
 
 # Crawl delay (helps prevent server overload)
 Crawl-delay: 1
