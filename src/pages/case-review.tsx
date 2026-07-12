@@ -61,7 +61,7 @@ export default function CaseReview() {
         status: "pending" as const,
       };
 
-      await caseService.submitCaseReview(caseData);
+      const submittedCase = await caseService.submitCaseReview(caseData);
       
       setIsSubmitted(true);
       toast({
@@ -69,13 +69,14 @@ export default function CaseReview() {
         description: "Our team will contact you within 24-48 hours.",
       });
 
+      // Send email notification with the case ID from the database response
       try {
         await emailService.logEmailNotification({
           notification_type: "case_submission",
           recipient_email: "Support@cipherstraces.com",
           subject: `New Case Submission: ${caseData.scam_type} - ${caseData.full_name}`,
           template_name: "case_submission",
-          case_id: caseData.id,
+          case_id: submittedCase.id,
           status: "sent",
           metadata: {
             scam_type: caseData.scam_type,
