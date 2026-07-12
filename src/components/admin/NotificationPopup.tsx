@@ -1,73 +1,109 @@
-import { useState, useEffect } from "react";
-import { Bell } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Bell, X, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { emailService } from "@/services/emailService";
-import Link from "next/link";
 
-export function NotificationPopup() {
-  const [recentCount, setRecentCount] = useState(0);
-  const [showPopup, setShowPopup] = useState(false);
+interface NotificationPopupProps {
+  notification: {
+    id: string;
+    fullName: string;
+    country: string;
+    scamType: string;
+    createdAt: string;
+  } | null;
+  onClose: () => void;
+  soundEnabled?: boolean;
+}
+
+export function NotificationPopup({ notification, onClose, soundEnabled = true }: NotificationPopupProps) {
+  const [show, setShow] = useState(false);
 
   useEffect(() => {
-    loadRecentNotifications();
-    const interval = setInterval(loadRecentNotifications, 60000); // Check every minute
-    return () => clearInterval(interval);
-  }, []);
-
-  const loadRecentNotifications = async () => {
-    try {
-      const notifications = await emailService.getNotificationHistory({ limit: 50 });
-      const last24Hours = notifications.filter(n => {
-        const sentDate = new Date(n.sent_at);
-        const now = new Date();
-        const hoursDiff = (now.getTime() - sentDate.getTime()) / (1000 * 60 * 60);
-        return hoursDiff <= 24;
-      });
-      setRecentCount(last24Hours.length);
-    } catch (error) {
-      console.error("Error loading notifications:", error);
+    if (notification) {
+      setShow(true);
+      
+      // Play notification sound
+      if (soundEnabled) {
+        try {
+          const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZSA0PVKvi8bllHAU2jdXzzn0pBSh+zPLaizsIGGS56+OcTgwOUKXh8bllHAU1i9P0zn0pBSd9zPLaizsIGGO46uScTgwOT6Xh8rllHAU1i9Pzz30pBSd9zPLaizsIF2O46uScTgwOT6Xh8rllHAU1i9Pzz30pBSd9zPLaizsIF2O46uScTgwOT6Xh8rllHAU1i9Pzz30pBSd9zPLaizsIF2O46uScTgwOT6Xh8rllHAU1i9Pzz30pBSd9zPLaizsIF2O46uScTgwOT6Xh8rllHAU1i9Pzz30pBSd9zPLaizsIF2O46uScTgwOT6Xh8rllHAU1i9Pzz30pBSd9zPLaizsIF2O46uScTgwOT6Xh8rllHAU1i9Pzz30pBSd9zPLbizsIF2O46uScTgwOT6Xh8rllHAU1i9Pzz30pBSd9zPLbizsIF2O46uScTgwOT6Xh8rllHAU1i9Pzz30pBSd9zPLbizsIF2O46uScTgwOT6Xh8rllHAU1i9Pzz30pBSd9zPLbizsIF2O46uScTgwOT6Xh8rllHAU1i9Pzz30pBSd9zPLbizsIF2O46uScTgwOT6Xh8rllHAU1i9Pzz30pBSd9zPLbizsIF2O46uScTgwOT6Xh8rllHAU1i9Pzz30pBSd9zPLbizsIF2O46uScTgwOT6Xh8rllHAU1i9Pzz30pBSd9zPLbizsIF2O46uScTgwOT6Xh8rllHAU1i9Pzz30pBSd9zPLbizsIF2O46uScTgwOT6Xh8rllHAU1i9Pzz30pBSd9zPLbizsIF2O46uScTgwOT6Xh8rllHAU1i9Pzz30pBSd9zPLbizsIF2O46uScTgwOT6Xh8rlkHAU1i9Pzz30pBSd9zPLbizsIF2O46uScTgwOT6Xh8rlkHAU1i9Pzz30pBSd9zPLbizsIF2O46uScTgwOT6Xh8rlkHAU1i9Pzz30pBSd9zPLbizsIF2O46uScTgwOT6Xh8rlkHAU1i9Pzz30pBSd9zPLbizsIF2O46uScTgwOT6Xh8rlkHAU1i9Pzz30pBSd9zPLbizsIF2O46uScTgwOT6Xh8rlkHAU1i9Pzz30pBSd9zPLbizsIF2O46uScTgwOT6Xh8rlkHAU1i9Pzz30pBSd9zPLbizsIF2O46uScTgwOT6Xh8rlkHAU1i9Pzz30pBSd9zPLbizsI');
+          audio.play().catch(() => {
+            // Ignore audio play errors (browser may block autoplay)
+          });
+        } catch (error) {
+          // Ignore audio errors
+        }
+      }
+      
+      // Auto-dismiss after 8 seconds
+      const timer = setTimeout(() => {
+        handleClose();
+      }, 8000);
+      
+      return () => clearTimeout(timer);
     }
+  }, [notification, soundEnabled]);
+
+  const handleClose = () => {
+    setShow(false);
+    setTimeout(() => {
+      onClose();
+    }, 300);
   };
 
-  return (
-    <div className="relative">
-      <Button
-        variant="ghost"
-        size="sm"
-        className="relative"
-        onClick={() => setShowPopup(!showPopup)}
-      >
-        <Bell className="h-5 w-5" />
-        {recentCount > 0 && (
-          <Badge 
-            variant="destructive" 
-            className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-          >
-            {recentCount > 9 ? "9+" : recentCount}
-          </Badge>
-        )}
-      </Button>
+  if (!notification || !show) return null;
 
-      {showPopup && (
-        <Card className="absolute right-0 top-12 w-80 shadow-xl z-50">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold">Recent Notifications</h3>
-              <Badge>{recentCount} new</Badge>
+  return (
+    <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 duration-300">
+      <Card className="w-96 shadow-2xl border-2 border-primary/20 bg-background">
+        <CardContent className="p-6">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-base">New Case Submitted</h3>
+                <p className="text-xs text-muted-foreground">Just now</p>
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground mb-4">
-              {recentCount} email notifications sent in the last 24 hours
-            </p>
-            <Button asChild className="w-full" size="sm">
-              <Link href="/admin/notifications">
-                View All Notifications
-              </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={handleClose}
+            >
+              <X className="h-4 w-4" />
             </Button>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Name:</span>
+              <span className="font-medium text-sm">{notification.fullName}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Country:</span>
+              <span className="font-medium text-sm">{notification.country}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Type:</span>
+              <Badge variant="secondary" className="text-xs">
+                {notification.scamType}
+              </Badge>
+            </div>
+          </div>
+          
+          <Button
+            onClick={handleClose}
+            className="w-full mt-4"
+            size="sm"
+          >
+            <Bell className="mr-2 h-4 w-4" />
+            View in Dashboard
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }
