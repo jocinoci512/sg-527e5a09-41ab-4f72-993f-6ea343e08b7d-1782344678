@@ -1,73 +1,185 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export const emailService = {
-  // ============================================
-  // EMAIL NOTIFICATION LOGGING
-  // ============================================
+// Resend API configuration
+const RESEND_API_KEY = process.env.NEXT_PUBLIC_RESEND_API_KEY || "";
+const RESEND_API_URL = "https://api.resend.com/emails";
 
-  async logEmailNotification(data: {
+export const emailService = {
+  /**
+   * Send email via Resend API
+   */
+  async sendEmail(params: {
+    to: string;
+    subject: string;
+    html: string;
+    from?: string;
+  }): Promise<boolean> {
+    try {
+      if (!RESEND_API_KEY) {
+        console.warn("RESEND_API_KEY not configured. Email will be logged but not sent.");
+        return false;
+      }
+
+      const response = await fetch(RESEND_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${RESEND_API_KEY}`,
+        },
+        body: JSON.stringify({
+          from: params.from || "Cipher Trace <notifications@cipherstraces.com>",
+          to: [params.to],
+          subject: params.subject,
+          html: params.html,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        console.error("Resend API error:", error);
+        return false;
+      }
+
+      const data = await response.json();
+      console.log("Email sent successfully via Resend:", data);
+      return true;
+    } catch (error) {
+      console.error("Error sending email:", error);
+      return false;
+    }
+  },
+
+  /**
+   * Log email notification to database and send via Resend
+   */
+  async logEmailNotification(notification: {
     notification_type: string;
     recipient_email: string;
     subject: string;
-    template_name?: string;
+    template_name: string;
     case_id?: string;
     lead_id?: string;
-    status?: string;
-    error_message?: string;
+    status: "sent" | "failed" | "pending";
     metadata?: any;
-  }) {
-    const { data: log, error } = await supabase
-      .from("email_notifications_log")
-      .insert({
-        notification_type: data.notification_type,
-        recipient_email: data.recipient_email,
-        subject: data.subject,
-        template_name: data.template_name,
-        case_id: data.case_id,
-        lead_id: data.lead_id,
-        status: data.status || "sent",
-        error_message: data.error_message,
-        metadata: data.metadata
-      } as any)
-      .select()
-      .single();
+  }): Promise<void> {
+    try {
+      // Generate HTML content based on template
+      const htmlContent = this.generateEmailTemplate(
+        notification.template_name,
+        notification.metadata,
+        notification.case_id
+      );
 
-    if (error) throw error;
-    return log;
+      // Send email via Resend
+      let emailStatus: "sent" | "failed" = "sent";
+      try {
+        const sent = await this.sendEmail({
+          to: notification.recipient_email,
+          subject: notification.subject,
+          html: htmlContent,
+        });
+        emailStatus = sent ? "sent" : "failed";
+      } catch (sendError) {
+        console.error("Email send failed:", sendError);
+        emailStatus = "failed";
+      }
+
+      // Log to database
+      const { error } = await supabase.from("email_notifications_log").insert({
+        notification_type: notification.notification_type,
+        recipient_email: notification.recipient_email,
+        subject: notification.subject,
+        template_name: notification.template_name,
+        case_id: notification.case_id || null,
+        lead_id: notification.lead_id || null,
+        status: emailStatus,
+        metadata: notification.metadata || {},
+      });
+
+      if (error) {
+        console.error("Error logging email notification:", error);
+      }
+    } catch (error) {
+      console.error("Error in logEmailNotification:", error);
+    }
   },
 
-  async getNotificationHistory(filters?: {
-    notification_type?: string;
-    recipient_email?: string;
-    limit?: number;
-  }) {
-    let query = supabase
-      .from("email_notifications_log")
-      .select("*")
-      .order("sent_at", { ascending: false });
+  /**
+   * Get all email notifications
+   */
+  async getEmailNotifications(): Promise<any[]> {
+    try {
+      const { data, error } = await supabase
+        .from("email_notifications_log")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-    if (filters?.notification_type) {
-      query = query.eq("notification_type", filters.notification_type);
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error("Error fetching email notifications:", error);
+      return [];
     }
-
-    if (filters?.recipient_email) {
-      query = query.eq("recipient_email", filters.recipient_email);
-    }
-
-    if (filters?.limit) {
-      query = query.limit(filters.limit);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return data || [];
   },
 
-  // ============================================
-  // EMAIL TEMPLATES
-  // ============================================
+  /**
+   * Get notification statistics
+   */
+  async getNotificationStats(): Promise<{
+    total: number;
+    sent: number;
+    failed: number;
+    pending: number;
+    today: number;
+  }> {
+    try {
+      const { data, error } = await supabase
+        .from("email_notifications_log")
+        .select("status, created_at");
 
-  generateCaseSubmissionEmailHTML(caseData: any): string {
+      if (error) throw error;
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const stats = {
+        total: data?.length || 0,
+        sent: data?.filter((n) => n.status === "sent").length || 0,
+        failed: data?.filter((n) => n.status === "failed").length || 0,
+        pending: data?.filter((n) => n.status === "pending").length || 0,
+        today:
+          data?.filter((n) => new Date(n.created_at) >= today).length || 0,
+      };
+
+      return stats;
+    } catch (error) {
+      console.error("Error fetching notification stats:", error);
+      return { total: 0, sent: 0, failed: 0, pending: 0, today: 0 };
+    }
+  },
+
+  /**
+   * Generate HTML email template
+   */
+  generateEmailTemplate(
+    templateName: string,
+    metadata: any,
+    caseId?: string
+  ): string {
+    if (templateName === "case_submission") {
+      return this.generateCaseSubmissionEmail(metadata, caseId);
+    }
+    return "<p>No template found</p>";
+  },
+
+  /**
+   * Generate Case Submission Email HTML
+   */
+  generateCaseSubmissionEmail(metadata: any, caseId?: string): string {
+    const caseUrl = `https://cipherstraces.com/admin/cases${
+      caseId ? `?case=${caseId}` : ""
+    }`;
+
     return `
 <!DOCTYPE html>
 <html lang="en">
@@ -75,177 +187,105 @@ export const emailService = {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>New Case Submission - Cipher Trace</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      line-height: 1.6;
-      color: #333;
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: #f5f5f5;
-    }
-    .container {
-      background-color: white;
-      border-radius: 8px;
-      padding: 30px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .header {
-      border-bottom: 3px solid #1e40af;
-      padding-bottom: 20px;
-      margin-bottom: 30px;
-    }
-    .logo {
-      font-size: 24px;
-      font-weight: bold;
-      color: #1e40af;
-    }
-    .alert {
-      background-color: #fef2f2;
-      border-left: 4px solid #dc2626;
-      padding: 15px;
-      margin-bottom: 20px;
-      border-radius: 4px;
-    }
-    .info-row {
-      display: flex;
-      padding: 12px 0;
-      border-bottom: 1px solid #e5e7eb;
-    }
-    .info-label {
-      font-weight: 600;
-      width: 150px;
-      color: #6b7280;
-    }
-    .info-value {
-      flex: 1;
-      color: #111827;
-    }
-    .priority-high {
-      background-color: #dc2626;
-      color: white;
-      padding: 4px 12px;
-      border-radius: 4px;
-      display: inline-block;
-      font-size: 12px;
-      font-weight: bold;
-    }
-    .footer {
-      margin-top: 30px;
-      padding-top: 20px;
-      border-top: 1px solid #e5e7eb;
-      font-size: 14px;
-      color: #6b7280;
-      text-align: center;
-    }
-    .btn {
-      display: inline-block;
-      background-color: #1e40af;
-      color: white;
-      padding: 12px 24px;
-      text-decoration: none;
-      border-radius: 6px;
-      margin-top: 20px;
-      font-weight: 600;
-    }
-  </style>
 </head>
-<body>
-  <div class="container">
-    <div class="header">
-      <div class="logo">🔍 Cipher Trace</div>
-      <p style="margin: 10px 0 0 0; color: #6b7280;">Professional Fraud Investigation</p>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8f9fa;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); padding: 40px 30px; text-align: center;">
+      <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">
+        🔔 New Case Submission
+      </h1>
+      <p style="color: #cbd5e1; margin: 10px 0 0 0; font-size: 14px;">
+        Cipher Trace Case Management System
+      </p>
     </div>
 
-    <div class="alert">
-      <strong>⚠️ NEW CASE SUBMISSION ALERT</strong>
-      <p style="margin: 8px 0 0 0;">A new case review has been submitted and requires immediate attention.</p>
-    </div>
+    <!-- Content -->
+    <div style="padding: 40px 30px;">
+      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px 20px; margin-bottom: 30px; border-radius: 4px;">
+        <p style="margin: 0; color: #92400e; font-weight: 600; font-size: 14px;">
+          ⚡ Action Required: New fraud case submitted and requires review
+        </p>
+      </div>
 
-    <h2 style="color: #1e40af; margin-bottom: 20px;">Case Details</h2>
+      <h2 style="color: #0F172A; font-size: 20px; font-weight: 700; margin: 0 0 20px 0;">
+        Case Details
+      </h2>
 
-    <div class="info-row">
-      <div class="info-label">Submission ID:</div>
-      <div class="info-value"><strong>${caseData.id}</strong></div>
-    </div>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+        <tr>
+          <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #6b7280; font-size: 14px; width: 40%;">
+            Case ID:
+          </td>
+          <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #0F172A; font-weight: 600; font-size: 14px;">
+            ${caseId ? caseId.slice(0, 8).toUpperCase() : "N/A"}
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #6b7280; font-size: 14px;">
+            Scam Type:
+          </td>
+          <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #0F172A; font-weight: 600; font-size: 14px;">
+            ${metadata.scam_type || "Not specified"}
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #6b7280; font-size: 14px;">
+            Amount Lost:
+          </td>
+          <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #dc2626; font-weight: 700; font-size: 16px;">
+            $${metadata.amount_lost?.toLocaleString() || "0"}
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #6b7280; font-size: 14px;">
+            Submitted:
+          </td>
+          <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #0F172A; font-size: 14px;">
+            ${new Date(metadata.submitted_at).toLocaleString()}
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">
+            Status:
+          </td>
+          <td style="padding: 12px 0;">
+            <span style="display: inline-block; background-color: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; text-transform: uppercase;">
+              Pending Review
+            </span>
+          </td>
+        </tr>
+      </table>
 
-    <div class="info-row">
-      <div class="info-label">Full Name:</div>
-      <div class="info-value">${caseData.full_name}</div>
-    </div>
+      <div style="background-color: #f1f5f9; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+        <h3 style="color: #0F172A; font-size: 16px; font-weight: 700; margin: 0 0 12px 0;">
+          📋 Next Steps
+        </h3>
+        <ul style="margin: 0; padding-left: 20px; color: #475569; font-size: 14px; line-height: 1.6;">
+          <li style="margin-bottom: 8px;">Review case details in admin dashboard</li>
+          <li style="margin-bottom: 8px;">Conduct preliminary investigation assessment</li>
+          <li style="margin-bottom: 8px;">Contact client within 24-48 hours</li>
+          <li style="margin-bottom: 0;">Document all findings and recommendations</li>
+        </ul>
+      </div>
 
-    <div class="info-row">
-      <div class="info-label">Email:</div>
-      <div class="info-value"><a href="mailto:${caseData.email}">${caseData.email}</a></div>
-    </div>
-
-    <div class="info-row">
-      <div class="info-label">Phone:</div>
-      <div class="info-value">${caseData.phone || 'Not provided'}</div>
-    </div>
-
-    <div class="info-row">
-      <div class="info-label">Country:</div>
-      <div class="info-value">${caseData.country || 'Not specified'}</div>
-    </div>
-
-    <div class="info-row">
-      <div class="info-label">Scam Type:</div>
-      <div class="info-value"><strong>${caseData.scam_type}</strong></div>
-    </div>
-
-    <div class="info-row">
-      <div class="info-label">Amount Lost:</div>
-      <div class="info-value">
-        <span class="priority-high">$${Number(caseData.amount_lost || 0).toLocaleString()}</span>
+      <div style="text-align: center; margin-top: 30px;">
+        <a href="${caseUrl}" style="display: inline-block; background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          View Case in Dashboard →
+        </a>
       </div>
     </div>
 
-    ${caseData.cryptocurrency_used ? `
-    <div class="info-row">
-      <div class="info-label">Cryptocurrency:</div>
-      <div class="info-value">${caseData.cryptocurrency_used}</div>
-    </div>
-    ` : ''}
-
-    ${caseData.wallet_address ? `
-    <div class="info-row">
-      <div class="info-label">Wallet Address:</div>
-      <div class="info-value"><code style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${caseData.wallet_address}</code></div>
-    </div>
-    ` : ''}
-
-    ${caseData.scammer_website ? `
-    <div class="info-row">
-      <div class="info-label">Scammer Website:</div>
-      <div class="info-value"><a href="${caseData.scammer_website}" target="_blank">${caseData.scammer_website}</a></div>
-    </div>
-    ` : ''}
-
-    <div style="margin-top: 30px; padding: 20px; background-color: #f9fafb; border-radius: 6px;">
-      <h3 style="margin-top: 0; color: #1e40af;">Incident Description:</h3>
-      <p style="white-space: pre-wrap; color: #374151;">${caseData.incident_description}</p>
-    </div>
-
-    ${caseData.evidence_files || caseData.screenshot_files ? `
-    <div style="margin-top: 20px;">
-      <h3 style="color: #1e40af;">Attachments:</h3>
-      <p style="color: #6b7280;">Files have been uploaded and are available in the admin dashboard.</p>
-    </div>
-    ` : ''}
-
-    <div style="text-align: center; margin-top: 30px;">
-      <a href="https://cipherstraces.com/admin/cases" class="btn">
-        View in Admin Dashboard →
-      </a>
-    </div>
-
-    <div class="footer">
-      <p><strong>Cipher Trace</strong> | Professional Fraud Investigation</p>
-      <p>Support@cipherstraces.com | +1 (646) 244-0064</p>
-      <p style="font-size: 12px; margin-top: 10px;">
-        This is an automated notification. Please respond from the admin dashboard.
+    <!-- Footer -->
+    <div style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+      <p style="color: #6b7280; font-size: 13px; margin: 0 0 8px 0;">
+        Cipher Trace - Professional Fraud Investigation & Blockchain Intelligence
+      </p>
+      <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+        Support@cipherstraces.com • +1 (646) 244-0064
+      </p>
+      <p style="color: #d1d5db; font-size: 11px; margin: 16px 0 0 0;">
+        This is an automated notification from the Cipher Trace case management system.
       </p>
     </div>
   </div>
@@ -253,82 +293,4 @@ export const emailService = {
 </html>
     `;
   },
-
-  generateContactLeadEmailHTML(leadData: any): string {
-    return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>New Contact Inquiry - Cipher Trace</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      line-height: 1.6;
-      color: #333;
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: #f5f5f5;
-    }
-    .container {
-      background-color: white;
-      border-radius: 8px;
-      padding: 30px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .header {
-      border-bottom: 3px solid #1e40af;
-      padding-bottom: 20px;
-      margin-bottom: 30px;
-    }
-    .info-row {
-      padding: 12px 0;
-      border-bottom: 1px solid #e5e7eb;
-    }
-    .label { font-weight: 600; color: #6b7280; }
-    .value { color: #111827; margin-top: 4px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1 style="color: #1e40af; margin: 0;">📧 New Contact Inquiry</h1>
-    </div>
-
-    <div class="info-row">
-      <div class="label">Name:</div>
-      <div class="value">${leadData.name}</div>
-    </div>
-
-    <div class="info-row">
-      <div class="label">Email:</div>
-      <div class="value"><a href="mailto:${leadData.email}">${leadData.email}</a></div>
-    </div>
-
-    ${leadData.phone ? `
-    <div class="info-row">
-      <div class="label">Phone:</div>
-      <div class="value">${leadData.phone}</div>
-    </div>
-    ` : ''}
-
-    <div style="margin-top: 30px; padding: 20px; background-color: #f9fafb; border-radius: 6px;">
-      <h3 style="margin-top: 0;">Message:</h3>
-      <p style="white-space: pre-wrap;">${leadData.message}</p>
-    </div>
-
-    <div style="text-align: center; margin-top: 30px;">
-      <a href="https://cipherstraces.com/admin/leads" 
-         style="display: inline-block; background-color: #1e40af; color: white; 
-                padding: 12px 24px; text-decoration: none; border-radius: 6px;">
-        View in Dashboard →
-      </a>
-    </div>
-  </div>
-</body>
-</html>
-    `;
-  }
 };
