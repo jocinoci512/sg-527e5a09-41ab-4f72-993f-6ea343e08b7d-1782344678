@@ -91,8 +91,8 @@ export default function AdminDashboard() {
       
       setStats({
         totalCases: caseStats.total,
-        pendingCases: caseStats.pending,
-        activeCases: caseStats.active,
+        pendingCases: caseStats.submitted,  // Fixed: use 'submitted' instead of 'pending'
+        activeCases: caseStats.active_investigation,  // Fixed: use 'active_investigation' instead of 'active'
         closedCases: caseStats.closed,
         newCasesToday: caseStats.today,
         totalLeads: leadStats.total,
