@@ -29,19 +29,21 @@ export default function AdminNotifications() {
 
   useEffect(() => {
     loadNotifications();
-  }, [typeFilter]);
+  }, []);
 
   const loadNotifications = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const filters = typeFilter !== "all" ? { notification_type: typeFilter } : {};
-      const data = await emailService.getNotificationHistory(filters);
+      const data = await emailService.getEmailNotifications();
       setNotifications(data);
+      
+      const stats = await emailService.getNotificationStats();
+      setStats(stats);
     } catch (error) {
       console.error("Error loading notifications:", error);
       toast({
         title: "Error",
-        description: "Could not load notification history",
+        description: "Failed to load notifications",
         variant: "destructive"
       });
     } finally {
