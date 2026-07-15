@@ -207,23 +207,33 @@ export default function CaseReview() {
         description: "Our team will contact you within 24-48 hours.",
       });
 
-      // Send email notification
+      // Send admin notification email to support@cipherstraces.com
+      const emailData = {
+        caseId: submittedCase.reference_id || submittedCase.id,
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        country: formData.country,
+        scamType: formData.scamType,
+        amountLost: amountNumber,
+        cryptocurrency: formData.cryptocurrency || undefined,
+        walletAddress: formData.walletAddress || undefined,
+        scammerWebsite: formData.scammerWebsite || undefined,
+        incidentDescription: formData.incidentDescription,
+        submittedAt: new Date().toISOString(),
+      };
+
       try {
-        await emailService.logEmailNotification({
-          notification_type: "case_submission",
-          recipient_email: "Support@cipherstraces.com",
-          subject: `New Case Submission: ${caseData.scam_type} - ${caseData.full_name}`,
-          template_name: "case_submission",
-          case_id: submittedCase.id,
-          status: "sent",
-          metadata: {
-            scam_type: caseData.scam_type,
-            amount_lost: caseData.amount_lost,
-            submitted_at: new Date().toISOString()
-          }
-        });
+        // Send admin notification
+        await emailService.sendCaseSubmissionEmail(emailData);
+        
+        // Send visitor confirmation
+        await emailService.sendCaseConfirmationEmail(emailData);
+        
+        console.log("Email notifications sent successfully");
       } catch (emailError) {
         console.error("Email notification failed (non-blocking):", emailError);
+        // Don't block the user flow if email fails
       }
     } catch (error: any) {
       console.error("Case submission error:", error);

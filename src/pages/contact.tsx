@@ -39,6 +39,32 @@ export default function Contact() {
         title: "Message Sent",
         description: "We'll respond to your inquiry within 24 hours.",
       });
+
+      // Send email notifications
+      const emailData = {
+        name: leadData.full_name,
+        email: leadData.email,
+        phone: leadData.phone || undefined,
+        subject: leadData.subject,
+        message: leadData.message,
+        submittedAt: new Date().toISOString(),
+      };
+
+      try {
+        // Import emailService at the top
+        const { emailService } = await import("@/services/emailService");
+        
+        // Send admin notification
+        await emailService.sendContactFormEmail(emailData);
+        
+        // Send visitor confirmation
+        await emailService.sendContactConfirmationEmail(emailData);
+        
+        console.log("Email notifications sent successfully");
+      } catch (emailError) {
+        console.error("Email notification failed (non-blocking):", emailError);
+        // Don't block the user flow if email fails
+      }
     } catch (error) {
       console.error("Error submitting contact form:", error);
       toast({
