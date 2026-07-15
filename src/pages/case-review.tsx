@@ -209,7 +209,7 @@ export default function CaseReview() {
 
       // Send admin notification email to support@cipherstraces.com
       const emailData = {
-        caseId: submittedCase.reference_id || submittedCase.id,
+        caseId: submittedCase.case_reference_id || submittedCase.id,
         fullName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
