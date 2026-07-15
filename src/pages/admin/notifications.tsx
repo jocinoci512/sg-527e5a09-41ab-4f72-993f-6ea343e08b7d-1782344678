@@ -25,6 +25,13 @@ export default function AdminNotifications() {
   const [loading, setLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [stats, setStats] = useState({
+    total: 0,
+    sent: 0,
+    failed: 0,
+    pending: 0,
+    today: 0
+  });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -37,8 +44,8 @@ export default function AdminNotifications() {
       const data = await emailService.getEmailNotifications();
       setNotifications(data);
       
-      const stats = await emailService.getNotificationStats();
-      setStats(stats);
+      const notificationStats = await emailService.getNotificationStats();
+      setStats(notificationStats);
     } catch (error) {
       console.error("Error loading notifications:", error);
       toast({
