@@ -61,7 +61,11 @@ export default function CaseReview() {
         status: "pending" as const,
       };
 
+      console.log("Attempting to submit case with data:", caseData);
+
       const submittedCase = await caseService.submitCaseReview(caseData);
+      
+      console.log("Case submitted successfully:", submittedCase);
       
       setIsSubmitted(true);
       toast({
@@ -71,6 +75,7 @@ export default function CaseReview() {
 
       // Send email notification with the case ID from the database response
       try {
+        console.log("Attempting to send email notification...");
         await emailService.logEmailNotification({
           notification_type: "case_submission",
           recipient_email: "Support@cipherstraces.com",
@@ -84,15 +89,21 @@ export default function CaseReview() {
             submitted_at: new Date().toISOString()
           }
         });
-      } catch (emailError) {
-        console.error("Email notification failed:", emailError);
+        console.log("Email notification sent successfully");
+      } catch (emailError: any) {
+        console.error("Email notification failed (non-blocking):", emailError);
         // Don't fail the submission if email fails
       }
-    } catch (error) {
-      console.error("Error submitting case review:", error);
+    } catch (error: any) {
+      console.error("CASE SUBMISSION ERROR - Full details:", error);
+      console.error("Error message:", error.message);
+      console.error("Error details:", error.details || error);
+      console.error("Error hint:", error.hint);
+      console.error("Error code:", error.code);
+      
       toast({
         title: "Submission Failed",
-        description: "There was an error submitting your case. Please try again or contact us directly.",
+        description: error.message || "There was an error submitting your case. Please try again or contact us directly.",
         variant: "destructive",
       });
     } finally {
