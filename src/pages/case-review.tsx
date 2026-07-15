@@ -190,7 +190,7 @@ export default function CaseReview() {
         wallet_address: formData.walletAddress || null,
         scammer_website: formData.scammerWebsite || null,
         incident_description: formData.incidentDescription,
-        status: "pending" as const,
+        status: "submitted" as const,  // Fixed: use 'submitted' instead of 'pending'
       };
 
       console.log("Submitting case:", caseData);

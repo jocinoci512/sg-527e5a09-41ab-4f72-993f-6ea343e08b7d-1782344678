@@ -88,8 +88,9 @@ export const caseService = {
 
     const stats = {
       total: cases?.length || 0,
-      pending: cases?.filter(c => c.status === "pending").length || 0,
-      active: cases?.filter(c => c.status === "active").length || 0,
+      submitted: cases?.filter(c => c.status === "submitted").length || 0,
+      under_review: cases?.filter(c => c.status === "under_review").length || 0,
+      active_investigation: cases?.filter(c => c.status === "active_investigation").length || 0,
       closed: cases?.filter(c => c.status === "closed").length || 0,
       today: cases?.filter(c => {
         const today = new Date();
