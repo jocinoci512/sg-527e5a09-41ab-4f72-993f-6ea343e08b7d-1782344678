@@ -225,6 +225,37 @@ export default function ReportScam() {
         title: "Case submitted successfully",
         description: `Reference ID: ${caseData.case_reference_id}`,
       });
+
+      // Send email notifications
+      const emailData = {
+        caseId: caseData.case_reference_id || caseData.id,
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        country: formData.country,
+        scamType: formData.fraudType,
+        amountLost: parseFloat(formData.amountLost.replace(/[^0-9.-]+/g, "")) || 0,
+        cryptocurrency: formData.cryptocurrencyType || undefined,
+        walletAddress: formData.walletAddress || undefined,
+        scammerWebsite: formData.platformInvolved || undefined,
+        incidentDescription: formData.incidentDescription,
+        submittedAt: new Date().toISOString(),
+      };
+
+      try {
+        const { emailService } = await import("@/services/emailService");
+        
+        // Send admin notification to support@cipherstraces.com
+        await emailService.sendCaseSubmissionEmail(emailData);
+        
+        // Send visitor confirmation
+        await emailService.sendCaseConfirmationEmail(emailData);
+        
+        console.log("Email notifications sent successfully");
+      } catch (emailError) {
+        console.error("Email notification failed (non-blocking):", emailError);
+        // Don't block the user flow if email fails
+      }
     } catch (error: any) {
       console.error("Error submitting case:", error);
       toast({
