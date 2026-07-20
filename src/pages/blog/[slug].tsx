@@ -17,11 +17,11 @@ interface BlogPost {
   excerpt: string;
   content: string;
   featured_image: string | null;
-  published_at: string;
+  publish_date: string;
   views: number;
-  read_time: number;
-  meta_title: string | null;
-  meta_description: string | null;
+  reading_time: number;
+  seo_title: string | null;
+  seo_description: string | null;
   category: {
     name: string;
     slug: string;
@@ -41,7 +41,7 @@ interface RelatedPost {
   category: {
     name: string;
   };
-  read_time: number;
+  reading_time: number;
 }
 
 interface BlogPostPageProps {
@@ -84,8 +84,8 @@ export default function BlogPostPage({ post, relatedPosts }: BlogPostPageProps) 
   return (
     <Layout>
       <SEO
-        title={post.meta_title || `${post.title} | Cipher Trace Blog`}
-        description={post.meta_description || post.excerpt}
+        title={post.seo_title || `${post.title} | Cipher Trace Blog`}
+        description={post.seo_description || post.excerpt}
         image={post.featured_image || undefined}
       />
 
@@ -107,8 +107,8 @@ export default function BlogPostPage({ post, relatedPosts }: BlogPostPageProps) 
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                <time dateTime={post.published_at}>
-                  {new Date(post.published_at).toLocaleDateString("en-US", {
+                <time dateTime={post.publish_date}>
+                  {new Date(post.publish_date).toLocaleDateString("en-US", {
                     month: "long",
                     day: "numeric",
                     year: "numeric"
@@ -118,7 +118,7 @@ export default function BlogPostPage({ post, relatedPosts }: BlogPostPageProps) 
               <span>•</span>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
-                <span>{post.read_time} min read</span>
+                <span>{post.reading_time} min read</span>
               </div>
               <span>•</span>
               <span>{post.views} views</span>
@@ -243,7 +243,7 @@ export default function BlogPostPage({ post, relatedPosts }: BlogPostPageProps) 
                         </p>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Clock className="h-4 w-4" />
-                          <span>{related.read_time} min read</span>
+                          <span>{related.reading_time} min read</span>
                         </div>
                       </CardContent>
                     </Card>
@@ -263,7 +263,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     .from("blog_posts")
     .select("slug")
     .eq("status", "published")
-    .order("published_at", { ascending: false });
+    .order("publish_date", { ascending: false });
 
   if (error || !posts) {
     return {
@@ -294,11 +294,11 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       excerpt,
       content,
       featured_image,
-      published_at,
+      publish_date,
       views,
-      read_time,
-      meta_title,
-      meta_description,
+      reading_time,
+      seo_title,
+      seo_description,
       category:blog_categories(name, slug),
       author:blog_authors(name, bio, avatar_url)
     `)
@@ -324,7 +324,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       title,
       slug,
       excerpt,
-      read_time,
+      reading_time,
       category:blog_categories(name)
     `)
     .eq("status", "published")
