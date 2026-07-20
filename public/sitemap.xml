@@ -9,7 +9,7 @@
   <!-- Homepage - Highest Priority -->
   <url>
     <loc>https://cipherstraces.com/</loc>
-    <lastmod>2026-07-12</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -17,21 +17,21 @@
   <!-- Core Service Pages - Very High Priority -->
   <url>
     <loc>https://cipherstraces.com/case-review</loc>
-    <lastmod>2026-07-12</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
   
   <url>
     <loc>https://cipherstraces.com/report-scam</loc>
-    <lastmod>2026-07-12</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
   
   <url>
     <loc>https://cipherstraces.com/contact</loc>
-    <lastmod>2026-07-12</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -39,80 +39,172 @@
   <!-- Main Navigation Pages -->
   <url>
     <loc>https://cipherstraces.com/about</loc>
-    <lastmod>2026-07-12</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   
   <url>
     <loc>https://cipherstraces.com/services</loc>
-    <lastmod>2026-07-12</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
   
   <url>
     <loc>https://cipherstraces.com/scams</loc>
-    <lastmod>2026-07-12</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   
   <url>
     <loc>https://cipherstraces.com/blog</loc>
-    <lastmod>2026-07-12</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   
   <url>
     <loc>https://cipherstraces.com/faq</loc>
-    <lastmod>2026-07-12</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   
-  <!-- Service Pages - High Priority for SEO -->
+  <!-- Service Pages -->
   <url>
     <loc>https://cipherstraces.com/services/crypto-fraud</loc>
-    <lastmod>2026-07-12</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   
-  <!-- Scam Type Pages - High Priority for SEO -->
+  <!-- Scam Type Pages -->
   <url>
     <loc>https://cipherstraces.com/scams/pig-butchering</loc>
-    <lastmod>2026-07-12</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   
-  <!-- Legal Pages - Lower Priority -->
+  <!-- Blog Articles - High Priority for SEO -->
+  <url>
+    <loc>https://cipherstraces.com/blog/how-to-recover-stolen-cryptocurrency-complete-guide</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://cipherstraces.com/blog/blockchain-investigation-services-crypto-tracing</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://cipherstraces.com/blog/wallet-security-best-practices-cryptocurrency</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://cipherstraces.com/blog/tracing-cryptocurrency-transactions-investigation-methods</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://cipherstraces.com/blog/exchange-fraud-investigation-recovering-assets</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://cipherstraces.com/blog/pig-butchering-scam-romance-investment-fraud-guide</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  
+  <url>
+    <loc>https://cipherstraces.com/blog/cryptocurrency-romance-scams-dating-app-fraud-recovery</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://cipherstraces.com/blog/defi-rug-pull-scams-token-fraud-recovery-guide</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://cipherstraces.com/blog/nft-scams-digital-art-fraud-protection-guide</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://cipherstraces.com/blog/ransomware-investigation-recovery-services</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://cipherstraces.com/blog/data-breach-investigation-professional-response</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://cipherstraces.com/blog/trust-wallet-hack-recovery-investigation-guide</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://cipherstraces.com/blog/metamask-security-protection-hack-recovery</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Legal Pages -->
   <url>
     <loc>https://cipherstraces.com/privacy</loc>
-    <lastmod>2026-07-12</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   
   <url>
     <loc>https://cipherstraces.com/terms</loc>
-    <lastmod>2026-07-12</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   
   <url>
     <loc>https://cipherstraces.com/disclaimer</loc>
-    <lastmod>2026-07-12</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   
   <url>
     <loc>https://cipherstraces.com/cookies</loc>
-    <lastmod>2026-07-12</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
