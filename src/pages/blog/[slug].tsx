@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-import { Calendar, Clock, ArrowLeft, Share2, Facebook, Twitter, Linkedin, Mail } from "lucide-react";
+import { Calendar, Clock, ArrowLeft, Share2, Facebook, Twitter, Linkedin, Mail, Globe, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRouter } from "next/router";
 
@@ -30,6 +30,9 @@ interface BlogPost {
     name: string;
     bio: string | null;
     avatar_url: string | null;
+    twitter_url: string | null;
+    linkedin_url: string | null;
+    website_url: string | null;
   };
 }
 
@@ -153,7 +156,7 @@ export default function BlogPostPage({ post, relatedPosts }: BlogPostPageProps) 
               <div>
                 <p className="font-semibold text-foreground">{post.author.name}</p>
                 {post.author.bio && (
-                  <p className="text-sm text-muted-foreground">{post.author.bio}</p>
+                  <p className="text-sm text-muted-foreground line-clamp-1">{post.author.bio}</p>
                 )}
               </div>
             </div>
@@ -200,7 +203,57 @@ export default function BlogPostPage({ post, relatedPosts }: BlogPostPageProps) 
 
           <Separator className="my-12" />
 
-          <div className="bg-muted/30 rounded-lg p-8 text-center">
+          <section className="bg-muted/50 rounded-lg p-8 mb-12">
+            <div className="flex flex-col md:flex-row gap-6">
+              {post.author.avatar_url && (
+                <div className="flex-shrink-0">
+                  <img
+                    src={post.author.avatar_url}
+                    alt={post.author.name}
+                    className="w-24 h-24 rounded-full"
+                  />
+                </div>
+              )}
+              <div className="flex-grow">
+                <h3 className="text-xl font-bold text-foreground mb-2 font-heading">
+                  About {post.author.name}
+                </h3>
+                {post.author.bio && (
+                  <p className="text-muted-foreground mb-4">
+                    {post.author.bio}
+                  </p>
+                )}
+                <div className="flex flex-wrap items-center gap-3">
+                  {post.author.website_url && (
+                    <Button asChild variant="outline" size="sm">
+                      <a href={post.author.website_url} target="_blank" rel="noopener noreferrer">
+                        <Globe className="h-4 w-4 mr-2" />
+                        Website
+                      </a>
+                    </Button>
+                  )}
+                  {post.author.twitter_url && (
+                    <Button asChild variant="outline" size="sm">
+                      <a href={post.author.twitter_url} target="_blank" rel="noopener noreferrer">
+                        <Twitter className="h-4 w-4 mr-2" />
+                        Twitter
+                      </a>
+                    </Button>
+                  )}
+                  {post.author.linkedin_url && (
+                    <Button asChild variant="outline" size="sm">
+                      <a href={post.author.linkedin_url} target="_blank" rel="noopener noreferrer">
+                        <Linkedin className="h-4 w-4 mr-2" />
+                        LinkedIn
+                      </a>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div className="bg-muted/30 rounded-lg p-8 text-center mb-12">
             <h3 className="text-2xl font-bold text-foreground mb-4 font-heading">
               Need Professional Investigation Services?
             </h3>
@@ -300,7 +353,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       seo_title,
       seo_description,
       category:blog_categories(name, slug),
-      author:blog_authors(name, bio, avatar_url)
+      author:blog_authors(name, bio, avatar_url, twitter_url, linkedin_url, website_url)
     `)
     .eq("slug", slug)
     .eq("status", "published")

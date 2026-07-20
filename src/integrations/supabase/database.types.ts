@@ -61,7 +61,10 @@ export type Database = {
           created_at: string | null
           email: string | null
           id: string
+          linkedin_url: string | null
           name: string
+          twitter_url: string | null
+          website_url: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -69,7 +72,10 @@ export type Database = {
           created_at?: string | null
           email?: string | null
           id?: string
+          linkedin_url?: string | null
           name: string
+          twitter_url?: string | null
+          website_url?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -77,7 +83,10 @@ export type Database = {
           created_at?: string | null
           email?: string | null
           id?: string
+          linkedin_url?: string | null
           name?: string
+          twitter_url?: string | null
+          website_url?: string | null
         }
         Relationships: []
       }
