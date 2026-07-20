@@ -1,3 +1,5 @@
+import { GetServerSideProps } from "next";
+import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
@@ -6,97 +8,52 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Calendar, Clock, Search, ArrowRight } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-export default function Blog() {
-  const categories = [
-    "All Posts",
-    "Crypto Recovery",
-    "Fraud Prevention",
-    "Scam Alerts",
-    "Blockchain Intelligence",
-    "Cybersecurity",
-    "Investigation Reports"
-  ];
+interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  featured_image: string | null;
+  publish_date: string;
+  reading_time: number;
+  views: number;
+  category: {
+    name: string;
+    slug: string;
+  };
+}
 
-  const featuredPosts = [
-    {
-      id: 1,
-      title: "How to Identify and Avoid Pig Butchering Scams in 2026",
-      excerpt: "Learn the warning signs of pig butchering scams and protect yourself from cryptocurrency investment fraud targeting victims through social media and dating apps.",
-      category: "Scam Alerts",
-      date: "2026-06-15",
-      readTime: "8 min read",
-      slug: "identify-avoid-pig-butchering-scams"
-    },
-    {
-      id: 2,
-      title: "Blockchain Transaction Tracing: A Complete Guide",
-      excerpt: "Understand how blockchain analysis helps investigators track stolen cryptocurrency and identify perpetrators of digital asset fraud across multiple networks.",
-      category: "Blockchain Intelligence",
-      date: "2026-06-10",
-      readTime: "12 min read",
-      slug: "blockchain-transaction-tracing-guide"
-    },
-    {
-      id: 3,
-      title: "Romance Scam Recovery: Steps to Take After Being Victimized",
-      excerpt: "Discover the essential steps victims should take immediately after discovering a romance scam, including evidence preservation and investigation options.",
-      category: "Fraud Prevention",
-      date: "2026-06-05",
-      readTime: "10 min read",
-      slug: "romance-scam-recovery-steps"
-    }
-  ];
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  post_count: number;
+}
 
-  const recentPosts = [
-    {
-      id: 4,
-      title: "NFT Scams: Common Tactics and How to Protect Your Digital Assets",
-      category: "Scam Alerts",
-      date: "2026-06-01",
-      readTime: "7 min read"
-    },
-    {
-      id: 5,
-      title: "Wire Fraud Investigation: What Law Enforcement Needs to Know",
-      category: "Investigation Reports",
-      date: "2026-05-28",
-      readTime: "9 min read"
-    },
-    {
-      id: 6,
-      title: "Cryptocurrency Exchange Fraud: Red Flags and Prevention",
-      category: "Crypto Recovery",
-      date: "2026-05-25",
-      readTime: "6 min read"
-    },
-    {
-      id: 7,
-      title: "Social Engineering in Forex Scams: Psychological Tactics Used",
-      category: "Fraud Prevention",
-      date: "2026-05-20",
-      readTime: "11 min read"
-    },
-    {
-      id: 8,
-      title: "Banking Fraud Recovery: Legal Options and Investigation Process",
-      category: "Investigation Reports",
-      date: "2026-05-15",
-      readTime: "8 min read"
-    },
-    {
-      id: 9,
-      title: "Cybersecurity Best Practices for Cryptocurrency Investors",
-      category: "Cybersecurity",
-      date: "2026-05-10",
-      readTime: "10 min read"
-    }
-  ];
+interface BlogPageProps {
+  posts: BlogPost[];
+  categories: Category[];
+  featuredPosts: BlogPost[];
+  popularPosts: BlogPost[];
+}
+
+export default function Blog({ posts, categories, featuredPosts, popularPosts }: BlogPageProps) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+
+  const filteredPosts = posts.filter((post) => {
+    const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === "all" || post.category.slug === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <Layout>
       <SEO 
-        title="Blog | Cipher Trace - Fraud Prevention & Recovery Insights"
+        title="Knowledge Center | Cipher Trace - Fraud Investigation & Recovery Insights"
         description="Expert insights on cryptocurrency fraud, blockchain investigation, scam prevention, and digital asset recovery from professional investigators at Cipher Trace."
       />
 
@@ -105,7 +62,7 @@ export default function Blog() {
         <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl font-heading">
-              Investigation Insights & Fraud Prevention
+              Knowledge Center
             </h1>
             <p className="mt-6 text-lg leading-8 text-white/90 sm:text-xl">
               Expert analysis, case studies, and educational content from our professional investigation team.
@@ -119,13 +76,23 @@ export default function Blog() {
           <div className="mb-12">
             <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
               <div className="flex flex-wrap gap-2">
+                <Button
+                  variant={selectedCategory === "all" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedCategory("all")}
+                >
+                  All Posts
+                  {selectedCategory === "all" && ` (${posts.length})`}
+                </Button>
                 {categories.map((category) => (
                   <Button
-                    key={category}
-                    variant={category === "All Posts" ? "default" : "outline"}
+                    key={category.id}
+                    variant={selectedCategory === category.slug ? "default" : "outline"}
                     size="sm"
+                    onClick={() => setSelectedCategory(category.slug)}
                   >
-                    {category}
+                    {category.name}
+                    {selectedCategory === category.slug && ` (${category.post_count})`}
                   </Button>
                 ))}
               </div>
@@ -135,76 +102,127 @@ export default function Blog() {
                   type="search"
                   placeholder="Search articles..."
                   className="pl-9"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
             </div>
           </div>
 
-          <div className="mb-16">
-            <h2 className="text-2xl font-bold text-foreground mb-8 font-heading">Featured Articles</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {featuredPosts.map((post) => (
-                <Card key={post.id} className="border-2 hover:border-primary transition-colors cursor-pointer group">
-                  <CardHeader>
-                    <Badge className="w-fit mb-3">{post.category}</Badge>
-                    <CardTitle className="text-xl font-heading group-hover:text-primary transition-colors">
-                      {post.title}
-                    </CardTitle>
-                    <CardDescription className="line-clamp-3">
-                      {post.excerpt}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        <span>{post.readTime}</span>
-                      </div>
-                    </div>
-                    <Button variant="ghost" className="group-hover:text-primary -ml-4">
-                      Read Article
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
+          {featuredPosts.length > 0 && (
+            <div className="mb-16">
+              <h2 className="text-2xl font-bold text-foreground mb-8 font-heading">Featured Articles</h2>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {featuredPosts.map((post) => (
+                  <Link key={post.id} href={`/blog/${post.slug}`}>
+                    <Card className="border-2 hover:border-primary transition-colors cursor-pointer group h-full">
+                      <CardHeader>
+                        <Badge className="w-fit mb-3">{post.category.name}</Badge>
+                        <CardTitle className="text-xl font-heading group-hover:text-primary transition-colors">
+                          {post.title}
+                        </CardTitle>
+                        <CardDescription className="line-clamp-3">
+                          {post.excerpt}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            <span>{new Date(post.publish_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            <span>{post.reading_time} min read</span>
+                          </div>
+                        </div>
+                        <Button variant="ghost" className="group-hover:text-primary -ml-4">
+                          Read Article
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
+
+          {popularPosts.length > 0 && (
+            <div className="mb-16">
+              <h2 className="text-2xl font-bold text-foreground mb-8 font-heading">Most Popular</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {popularPosts.map((post) => (
+                  <Link key={post.id} href={`/blog/${post.slug}`}>
+                    <Card className="border-2 hover:border-primary transition-colors cursor-pointer group h-full">
+                      <CardHeader>
+                        <div className="flex items-center justify-between mb-2">
+                          <Badge variant="outline">{post.category.name}</Badge>
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <Clock className="h-4 w-4" />
+                            <span>{post.reading_time} min</span>
+                          </div>
+                        </div>
+                        <CardTitle className="text-lg font-heading group-hover:text-primary transition-colors">
+                          {post.title}
+                        </CardTitle>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            <span>{new Date(post.publish_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                          </div>
+                          <span>•</span>
+                          <span>{post.views} views</span>
+                        </div>
+                      </CardHeader>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div>
-            <h2 className="text-2xl font-bold text-foreground mb-8 font-heading">Recent Posts</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {recentPosts.map((post) => (
-                <Card key={post.id} className="border-2 hover:border-primary transition-colors cursor-pointer group">
-                  <CardHeader>
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge variant="outline">{post.category}</Badge>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Clock className="h-4 w-4" />
-                        <span>{post.readTime}</span>
-                      </div>
-                    </div>
-                    <CardTitle className="text-lg font-heading group-hover:text-primary transition-colors">
-                      {post.title}
-                    </CardTitle>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                    </div>
-                  </CardHeader>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-12 text-center">
-            <Button size="lg" variant="outline">
-              Load More Articles
-            </Button>
+            <h2 className="text-2xl font-bold text-foreground mb-8 font-heading">
+              {searchQuery ? `Search Results (${filteredPosts.length})` : 
+               selectedCategory !== "all" ? `${categories.find(c => c.slug === selectedCategory)?.name} Articles` : 
+               "Latest Articles"}
+            </h2>
+            {filteredPosts.length === 0 ? (
+              <Card>
+                <CardContent className="pt-12 pb-12 text-center text-muted-foreground">
+                  {searchQuery ? "No articles found matching your search." : "No articles available yet."}
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {filteredPosts.map((post) => (
+                  <Link key={post.id} href={`/blog/${post.slug}`}>
+                    <Card className="border-2 hover:border-primary transition-colors cursor-pointer group h-full">
+                      <CardHeader>
+                        <div className="flex items-center justify-between mb-2">
+                          <Badge variant="outline">{post.category.name}</Badge>
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <Clock className="h-4 w-4" />
+                            <span>{post.reading_time} min read</span>
+                          </div>
+                        </div>
+                        <CardTitle className="text-lg font-heading group-hover:text-primary transition-colors">
+                          {post.title}
+                        </CardTitle>
+                        <CardDescription className="line-clamp-2">
+                          {post.excerpt}
+                        </CardDescription>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground mt-2">
+                          <Calendar className="h-4 w-4" />
+                          <span>{new Date(post.publish_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        </div>
+                      </CardHeader>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -230,3 +248,85 @@ export default function Blog() {
     </Layout>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  const { data: posts, error: postsError } = await supabase
+    .from("blog_posts")
+    .select(`
+      id,
+      title,
+      slug,
+      excerpt,
+      featured_image,
+      publish_date,
+      reading_time,
+      views,
+      category:blog_categories(name, slug)
+    `)
+    .eq("status", "published")
+    .order("publish_date", { ascending: false })
+    .limit(50);
+
+  const { data: categories, error: categoriesError } = await supabase
+    .from("blog_categories")
+    .select("id, name, slug")
+    .order("name");
+
+  const categoriesWithCount = await Promise.all(
+    (categories || []).map(async (cat) => {
+      const { count } = await supabase
+        .from("blog_posts")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "published")
+        .eq("category_id", cat.id);
+      
+      return {
+        ...cat,
+        post_count: count || 0
+      };
+    })
+  );
+
+  const { data: featuredPosts } = await supabase
+    .from("blog_posts")
+    .select(`
+      id,
+      title,
+      slug,
+      excerpt,
+      featured_image,
+      publish_date,
+      reading_time,
+      views,
+      category:blog_categories(name, slug)
+    `)
+    .eq("status", "published")
+    .order("publish_date", { ascending: false })
+    .limit(3);
+
+  const { data: popularPosts } = await supabase
+    .from("blog_posts")
+    .select(`
+      id,
+      title,
+      slug,
+      excerpt,
+      featured_image,
+      publish_date,
+      reading_time,
+      views,
+      category:blog_categories(name, slug)
+    `)
+    .eq("status", "published")
+    .order("views", { ascending: false })
+    .limit(6);
+
+  return {
+    props: {
+      posts: posts || [],
+      categories: categoriesWithCount || [],
+      featuredPosts: featuredPosts || [],
+      popularPosts: popularPosts || []
+    }
+  };
+};
