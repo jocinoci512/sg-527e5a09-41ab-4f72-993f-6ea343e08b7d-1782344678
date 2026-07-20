@@ -30,21 +30,23 @@ Target Topics:
 15. Blockchain Compliance and Asset Tracking
 
 ## Checklist
-- [x] Create: "How to Recover Stolen Cryptocurrency" - Investigation guide (done)
-- [x] Create: "Blockchain Investigation Services" - Tracing methods (done)
-- [x] Create: "Wallet Security Best Practices" - Protection strategies (done)
-- [x] Create: "Tracing Cryptocurrency Transactions" - Investigation methods (done)
-- [x] Create: "Exchange Fraud Investigation" - Asset recovery (done)
-- [x] Create: "Blockchain Analytics" - Professional transaction analysis (done)
-- [x] Create: "Cryptocurrency Compliance" - AML regulatory guide (done)
-- [ ] Create: "Digital Asset Investigations" - Professional services overview
-- [ ] Create: "Crypto Asset Tracing" - Advanced techniques
-- [ ] Create: "Transaction Analysis Methods" - Expert guide
-- [ ] Create: "Cryptocurrency Fraud Prevention" - Security measures
-- [ ] Create: "Blockchain Intelligence" - Investigation tools
-- [ ] Create: "Wallet Tracing Techniques" - Professional methods
-- [ ] Create: "Cryptocurrency Security" - Best practices guide
-- [ ] Create: "Digital Asset Protection" - Comprehensive security
+- [x] Create: "How to Recover Stolen Cryptocurrency" - Investigation guide
+- [x] Create: "Blockchain Investigation Services" - Tracing methods
+- [x] Create: "Wallet Security Best Practices" - Protection strategies
+- [x] Create: "Tracing Cryptocurrency Transactions" - Investigation methods
+- [x] Create: "Exchange Fraud Investigation" - Asset recovery
+- [x] Create: "Blockchain Analytics" - Professional transaction analysis
+- [x] Create: "Cryptocurrency Compliance" - AML regulatory guide
+- [x] Create: "Digital Asset Recovery" - Professional services (previously marked done)
+- [x] Create: "Crypto Wallet Hack Recovery" - Investigation methods
+- [x] Create: "Bitcoin Recovery Services" - BTC tracing guide
+- [x] Create: "Ethereum Recovery" - ETH investigation guide
+- [x] Create: "Cryptocurrency Fraud Prevention" - Security guide
+- [x] Create: "Blockchain Intelligence Tools" - Technology guide
+- [x] Create: "Asset Tracing Services" - Investigation methods
+- [ ] Create: "Transaction Analysis Methods" - Expert techniques (final article)
+
+Status: 14 of 15 articles complete
 
 ## Acceptance
 - 15 new blog posts published to database
